@@ -1,0 +1,193 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="csrf-token" content="{{ csrf_token }}">
+    <title>{% block title %}Base File{% endblock title %}</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+	<link href='https://fonts.googleapis.com/css?family=Oswald' rel='stylesheet'>
+	<script src="https://accounts.google.com/gsi/client" async defer></script>
+	<script>
+		window.onload = function() {
+			setTimeout(() => {
+				document.getElementById("spinner-container").style.display="none";
+				document.getElementById("spinner-container").style.zIndex = "-999";
+			}, 500);
+		};
+	</script>
+	 <style>
+		.spinner-container {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background-color: white;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			z-index: 9999;
+		}
+	 </style>
+</head>
+<body>
+    <div id="spinner-container" class="spinner-container flex-column">
+        <div class="spinner-border text-success" style="width: 3rem; height: 3rem;" role="status">
+        </div>
+		<div class="text-success"><b>Learn and Earn!</b></div>
+    </div>
+
+	<div id="doc_body">
+	<div class="container col-md-8 col-12 mx-md-auto mx-3 mb-3 mt-3">
+		<nav class="navbar navbar-expand-lg navbar-light border-bottom d-flex align-items-center justify-content-center">
+			<a class="navbar-brand d-flex align-items-center justify-content-center" href="" style="font-family: Oswald;">
+				<img src="{% static 'logo.svg' %}" width="45" height="45" class="d-inline-block align-top" alt="logo">
+				Price Action Repository
+			</a>
+			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<div class="collapse navbar-collapse" id="navbarNav">
+				<ul class="navbar-nav ml-auto" style="font-family: Oswald;font-weight:700;">
+					<li class="nav-item mr-3 {% if request.resolver_match.url_name == 'blog_view' %}active{% endif %}">
+						<a class="nav-link" href="{% url 'blog_view' %}">BLOG</a>
+					</li>
+					<li class="d-flex nav-item align-items-center" id="signout_btn">
+						<button id="logout_btn" class="btn btn-sm btn-outline-dark border-0" type="submit">SIGN OUT</button>
+					</li>
+					<li class="d-flex nav-item align-items-center" id="account_btns">
+						<div class="btn-group" role="group" aria-label="myaccount">
+							<a type="button" class="btn btn-success btn-sm" href="{% url 'register_view' %}">SIGN UP</a>
+							<a type="button" class="btn btn-outline-success btn-sm" href="{% url 'login_view' %}">SIGN IN</a>
+						</div>
+					</li>
+				</ul>
+			</div>
+		</nav>
+
+		<div class="alert alert-dismissible fade show" role="alert" id="response_messages" style="display:none;">
+			<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+				<span aria-hidden="true">&times;</span>
+			</button>
+		</div>
+
+	{% if messages %}
+		<div id="messages">
+			{% for message in messages %}
+				{% if message.tags == 'error' %}
+					<div class="alert alert-danger alert-dismissible fade show" role="alert">
+				{% else %}
+					<div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">{% endif %}
+						{{ message }}
+						<button type="button" class="close" data-dismiss="alert" aria-label="Close">
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+			{% endfor %}
+		</div>
+	{% endif %}
+
+	<section class="container">
+		<div class="row mt-5 mb-5 pt-5 pb-5">
+			<div class="col-12 text-center">
+				<h1 style="color:#333;"><strong>{% block sectionheading %}{% endblock sectionheading %}</strong></h1>
+				<p class="text-muted">{% block subsectionheading %}{% endblock subsectionheading %}</p>
+			</div>
+		</div>
+	</section>
+	{% block content %}
+
+	{% endblock content %}
+
+	  <footer class="col-md-4 py-4 my-4 border-top" style="font-family: Oswald;">
+		<div class="text-center">
+		  <p class="mb-3 mb-md-0 text-body-secondary">&copy; 2024 Price Action Repository</p>
+		</div>
+	  </footer>
+	</div>
+	</div>
+	{% block scriptjs %}
+
+	{% endblock scriptjs %}
+	<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+	<script src="{% static 'js/authManager.js' %}"></script>
+	<script type="text/javascript">
+		const auth = new authManager("http://127.0.0.1:8000/");
+
+		if (auth.isUserAuthenticated){
+			document.getElementById('account_btns').classList.remove('d-flex');
+			document.getElementById('account_btns').classList.add('d-none');
+			document.getElementById('signout_btn').classList.remove('d-none');
+			document.getElementById('signout_btn').classList.add('d-flex');
+		}else{
+			document.getElementById('account_btns').classList.remove('d-none');
+			document.getElementById('account_btns').classList.add('d-flex');
+			document.getElementById('signout_btn').classList.remove('d-flex');
+			document.getElementById('signout_btn').classList.add('d-none');
+		}
+
+		document.addEventListener("DOMContentLoaded", function() {
+			const registrationForm = document.getElementById("registration_form");
+			const loginForm = document.getElementById("login_form");
+			const logout_btn = document.getElementById("logout_btn");
+
+			if (registrationForm) {
+				registrationForm.addEventListener("submit", function(event) {
+					event.preventDefault();
+
+					const registerButton = document.getElementById("register_button");
+
+					if (registerButton) {
+						const first_name = document.getElementById("first_name").value;
+						const last_name = document.getElementById("last_name").value;
+						const email = document.getElementById("email").value;
+						const password = document.getElementById("password").value;
+						const password_confirm = document.getElementById("password_confirm").value;
+
+						auth.register(first_name, last_name, email, password, password_confirm, registerButton);
+					} else {
+						console.error("register_button element not found on the page.");
+					}
+				});
+			}
+
+			if(loginForm){
+				loginForm.addEventListener("submit", function(event) {
+					event.preventDefault();
+
+					const loginButton = document.getElementById("login_btn");
+
+					if (loginButton) {
+						const email = document.getElementById("email").value;
+						const password = document.getElementById("password").value;
+
+						auth.login(email, password, loginButton);
+					}
+				});
+
+			}
+
+			logout_btn.addEventListener("click", () => {
+				auth.logout(logout_btn);
+			});
+
+		});
+
+		// Example: Make a protected request
+		/*document.getElementById("protectedBtn").addEventListener("click", async () => {
+			try {
+				const response = await auth.makeProtectedRequest("http://127.0.0.1:8000/api/secure-endpoint/", { key: "value" });
+				console.log("Protected request successful:", response);
+			} catch (error) {
+				console.error("Error during protected request:", error);
+			}
+		});*/
+
+	</script>
+</body>
+</html>
