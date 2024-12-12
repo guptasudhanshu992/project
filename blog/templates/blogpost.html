@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}Blog{% endblock title %}
+
+{% block sectionheading %}{{ post.title }}{% endblock sectionheading %}
+
+{% block content %}
+<div class="container mt-5 text-justify bg-light">
+    <div class="text-center">
+        <img src="{{ post.image.url }}" class="img-fluid rounded" style="width: 75%; height: auto;">
+    </div>
+    <div class="mt-5 px-5">
+        {{ post.content | safe }}
+    </div>
+</div>
+{% endblock content %}

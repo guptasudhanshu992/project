@@ -1,1 +1,11 @@
-<h1>This is the homepage.</h1>
+{% extends 'base.html' %}
+
+{% block bannerimg %}style="background: none">
+{% endblock bannerimg %}
+{% block sectionheading %}Hi, <br>Welcome to <i>Price Action Repository!</i>{% endblock sectionheading %}
+{% block subsectionheading %}<b class="text-success">Born with the mission to spread financial literacy and empower individuals like you <br>to take charge of your financial future.</b><br>
+<a href="{% url 'register_view' %}" class="btn btn-lg btn-dark m-3" >Get Started</a>{% endblock subsectionheading %}
+
+{% block content %}
+
+{% endblock content %}
