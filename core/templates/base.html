@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<meta name="csrf-token" content="{{ csrf_token }}">
-    <title>{% block title %}Base File{% endblock title %}</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <title>{% block title %}Price Action Repository!{% endblock title %}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
 	<link href='https://fonts.googleapis.com/css?family=Oswald' rel='stylesheet'>
 	<script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -37,15 +37,13 @@
 </head>
 <body>
     <div id="spinner-container" class="spinner-container flex-column">
-        <div class="spinner-border text-success" style="width: 3rem; height: 3rem;" role="status">
-        </div>
+        <div class="spinner-border text-success" style="width: 3rem; height: 3rem;" role="status"></div>
 		<div class="text-success"><b>Learn and Earn!</b></div>
     </div>
 
 	<div id="doc_body">
-	<!-- <div class="container col-md-8 col-12 mx-md-auto mx-3 mb-3 mt-3"> -->
 	<div>
-		<nav class="navbar navbar-expand-lg navbar-light border-bottom d-flex align-items-center justify-content-center">
+		<nav class="px-5 navbar navbar-expand-lg navbar-light border-bottom d-flex align-items-center justify-content-center">
 			<a class="navbar-brand d-flex align-items-center justify-content-center" href="" style="font-family: Oswald;">
 				<img src="{% static 'logo.svg' %}" width="45" height="45" class="d-inline-block align-top" alt="logo">
 				Price Action Repository
@@ -61,15 +59,29 @@
 					<li class="nav-item mr-3 {% if request.resolver_match.url_name == 'blog_view' %}active{% endif %}">
 						<a class="nav-link" href="{% url 'blog_view' %}">BLOG</a>
 					</li>
-					<li class="d-flex nav-item align-items-center" id="signout_btn">
-						<button id="logout_btn" class="btn btn-sm btn-outline-dark border-0" type="submit">SIGN OUT</button>
-					</li>
-					<li class="d-flex nav-item align-items-center" id="account_btns">
-						<div class="btn-group" role="group" aria-label="myaccount">
-							<a type="button" class="btn btn-success btn-sm" href="{% url 'register_view' %}">SIGN UP</a>
-							<a type="button" class="btn btn-outline-success btn-sm" href="{% url 'login_view' %}">SIGN IN</a>
-						</div>
-					</li>
+					{% if request.user.is_authenticated %}
+						<li class="d-flex nav-item mr-3" id="myAccDropdown">
+							<div class="dropdown">
+								<button class="btn btn-success dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+								My Account
+								</button>
+								<div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+									<a class="dropdown-item" href="{% url 'profile' %}">Profile</a>
+									<form method="POST" id="logout_form">
+										{% csrf_token %}
+										<button class="dropdown-item" type="submit">Log Out</button>
+									</form>
+								</div>
+							</div>
+						</li>
+					{% else %}
+						<li class="d-flex nav-item align-items-center" id="account_btns">
+							<div class="btn-group" role="group" aria-label="myaccount">
+								<a type="button" class="btn btn-success btn-sm" href="{% url 'register' %}">SIGN UP</a>
+								<a type="button" class="btn btn-outline-success btn-sm" href="{% url 'login' %}">SIGN IN</a>
+							</div>
+						</li>
+					{% endif %}
 				</ul>
 			</div>
 		</nav>
@@ -121,33 +133,24 @@
 	{% block scriptjs %}
 
 	{% endblock scriptjs %}
-	<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+	<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.min.js"></script>
 	<script src="{% static 'js/authManager.js' %}"></script>
 	<script type="text/javascript">
-		const auth = new authManager("http://127.0.0.1:8000/");
 
-		if (auth.isUserAuthenticated){
-			document.getElementById('account_btns').classList.remove('d-flex');
-			document.getElementById('account_btns').classList.add('d-none');
-			document.getElementById('signout_btn').classList.remove('d-none');
-			document.getElementById('signout_btn').classList.add('d-flex');
-		}else{
-			document.getElementById('account_btns').classList.remove('d-none');
-			document.getElementById('account_btns').classList.add('d-flex');
-			document.getElementById('signout_btn').classList.remove('d-flex');
-			document.getElementById('signout_btn').classList.add('d-none');
-		}
+		document.addEventListener("DOMContentLoaded", async function() {
+			const auth = new authManager("http://127.0.0.1:8000/");
 
-		document.addEventListener("DOMContentLoaded", function() {
 			const registrationForm = document.getElementById("registration_form");
 			const loginForm = document.getElementById("login_form");
-			const logout_btn = document.getElementById("logout_btn");
+			const logoutForm = document.getElementById("logout_form");
 
 			if (registrationForm) {
 				registrationForm.addEventListener("submit", function(event) {
 					event.preventDefault();
+
+					console.log("register");
 
 					const registerButton = document.getElementById("register_button");
 
@@ -169,6 +172,8 @@
 				loginForm.addEventListener("submit", function(event) {
 					event.preventDefault();
 
+					console.log("login");
+
 					const loginButton = document.getElementById("login_btn");
 
 					if (loginButton) {
@@ -178,25 +183,19 @@
 						auth.login(email, password, loginButton);
 					}
 				});
-
 			}
 
-			logout_btn.addEventListener("click", () => {
-				auth.logout(logout_btn);
-			});
+			if(logoutForm){
+				logoutForm.addEventListener("submit", function(event) {
+					event.preventDefault();
 
+					console.log("logging out...");
+
+					const myAccDropdown = document.getElementById("myAccDropdown");
+					auth.logout(myAccDropdown);
+				});
+			}
 		});
-
-		// Example: Make a protected request
-		/*document.getElementById("protectedBtn").addEventListener("click", async () => {
-			try {
-				const response = await auth.makeProtectedRequest("http://127.0.0.1:8000/api/secure-endpoint/", { key: "value" });
-				console.log("Protected request successful:", response);
-			} catch (error) {
-				console.error("Error during protected request:", error);
-			}
-		});*/
-
 	</script>
 </body>
 </html>

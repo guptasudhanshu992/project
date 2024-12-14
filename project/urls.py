@@ -24,6 +24,7 @@ urlpatterns = [
     path("", include("core.urls")),
     path("", include("accounts.urls")),
     path("", include("blog.urls")),
+    path('trix-editor/', include('trix_editor.urls')),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
