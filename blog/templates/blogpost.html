@@ -2,15 +2,84 @@
 
 {% block title %}Blog{% endblock title %}
 
+
+{% block scriptjs %}
+<script src="/static/js/scrollspy.js" ></script>
+{% endblock scriptjs %}
+
 {% block sectionheading %}{{ post.title }}{% endblock sectionheading %}
+{% block subsectionheading %}<i class="fa-solid fa-user-pen mr-2"></i>{{ post.author }}
+<i class="fa-regular fa-calendar-days mr-2 ml-5"></i>{{ post.updated_at }}
+<i class="fa-regular fa-clock mr-2 ml-5"></i>{{ post.reading_time }} mins
+{% endblock subsectionheading %}
 
 {% block content %}
-<div class="container mt-5 text-justify bg-light">
-    <div class="text-center">
-        <img src="{{ post.image.url }}" class="img-fluid rounded" style="width: 75%; height: auto;">
+
+<div class="text-center">
+    <img src="{{ post.cover_image.url }}" class="img-fluid" style="width: 80%; height: auto;">
+</div>
+<div class="container d-flex bg-white py-5">
+    <div class="flex-grow-1 col-md-8 text-justify" id="article-content">
+        {% for section in sections %}
+            <section id="{{ section.id }}" class="scrollspy-section">
+                {% if section.section_title %}
+                <h4><b>{{ section.section_title }}</b></h4>
+                {% endif %}
+                {{ section.content_text | safe }}
+                {% if section.section_image %}
+                    <img src="{{ section.section_image.url }}" class="img-fluid mb-3" style="width: 100%; height: auto;">
+                {% endif %}
+            </section>
+        {% endfor %}
     </div>
-    <div class="mt-5 px-5">
-        {{ post.content | safe }}
+    <div class="col-md-4 sticky-top" style="height:500px; top:150px;">
+        <div class="row">
+          <div class="w-100 border-left p-3">
+            <nav class="flex-column pe-4">
+              <nav class="nav nav-pills flex-column scrollspy-nav">
+                <div class="container">
+                <div class="d-flex border-bottom py-3 mb-3 align-items-center">
+                      <p class="flex-grow-1 mb-0"><b>Share</b></p>
+                      <!-- Google -->
+                      <a href="https://www.google.com/" style="width:40px;height:40px;" target="_blank" class="btn btn-outline-danger flex-grow-1">
+                        <i class="fab fa-google"></i>
+                      </a>
+                      <!-- Facebook -->
+                      <a href="https://www.facebook.com/" style="width:40px;height:40px;" target="_blank" class="btn btn-outline-primary flex-grow-1">
+                        <i class="fab fa-facebook-f"></i>
+                      </a>
+                      <!-- LinkedIn -->
+                      <a href="https://www.linkedin.com/" style="width:40px;height:40px;" target="_blank" class="btn btn-outline-info flex-grow-1">
+                        <i class="fab fa-linkedin-in"></i>
+                      </a>
+                      <!-- Reddit -->
+                      <a href="https://www.reddit.com/" style="width:40px;height:40px;" target="_blank" class="btn btn-outline-warning flex-grow-1">
+                        <i class="fab fa-reddit-alien"></i>
+                      </a>
+                      <!-- Twitter -->
+                      <a href="https://twitter.com/" style="width:40px;height:40px;" target="_blank" class="btn btn-outline-secondary flex-grow-1">
+                        <i class="fab fa-twitter"></i>
+                      </a>
+                    </div>
+                </div>
+                <h4 class="text-secondary"><b><u>Table of Contents</u></b></h4>
+                {% for section in sections %}
+                    {% if section.section_title %}
+                        <li>
+                            <a class="btn btn-outline-secondary border-0" href="#{{ section.id }}">{{ section.section_title }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+              </nav>
+            </nav>
+          </div>
     </div>
 </div>
+</div>
+{% if request.user.is_authenticated %}
+<div class="container bg-white mb-5 py-5 d-flex">
+<button class="btn btn-outline-primary flex-grow-1 pt-3"><div class="container"><b>&lt&lt Previous</b><br><p>Article Title</p></div></button>
+<button class="btn btn-outline-primary flex-grow-1 pt-3"><div class="container"><b>Next &gt&gt</b><br><p>Article Title</p></div></button>
+</div>
+{% endif %}
 {% endblock content %}

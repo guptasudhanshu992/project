@@ -47,7 +47,7 @@
         <div class="col my-3">
             <a href="{% url 'blog_post_view' post_url=post.post_url %}" class="text-decoration-none">
                 <div class="card h-100" style="border-radius:0;">
-                    <img src="{{ post.image.url }}" class="card-img-top" style="border-radius:0;" alt="{{ post.alt }}">
+                    <img src="{{ post.cover_image.url }}" class="card-img-top" style="border-radius:0;" alt="{{ post.alt }}">
                     <div class="card-body">
                         <h5 class="card-title text-dark">
                             <b>{{ post.title }}</b><br>

@@ -1,6 +1,6 @@
 from django.views import View
 from django.shortcuts import render
-from .models import BlogPost, Category
+from .models import BlogPost, BlogSection, Category
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView
 from django.http import JsonResponse
@@ -12,17 +12,17 @@ class BlogView(View):
         selected_category = request.GET.get('category_id', None)
 
         if selected_category and Category.objects.filter(id=selected_category).count()>0:
-            live_posts = BlogPost.objects.filter(status_live=True, categories=selected_category).only('title', 'post_url', 'image', 'image_alt', 'categories' )
+            live_posts = BlogPost.objects.filter(status_live=True, categories=selected_category).only('title', 'post_url', 'cover_image', 'cover_image_alt', 'categories' )
         else:
-            live_posts = BlogPost.objects.filter(status_live=True).only('title', 'post_url', 'image', 'image_alt', 'categories' )
+            live_posts = BlogPost.objects.filter(status_live=True).only('title', 'post_url', 'cover_image', 'cover_image_alt', 'categories' )
 
         if request.headers.get("x-requested-with") == "XMLHttpRequest":
             posts_data = [
                 {
                     "title": post.title,
                     "post_url": post.post_url,
-                    "image": post.image.url if post.image else "",
-                    "alt": post.image_alt,
+                    "image": post.cover_image.url if post.cover_image else "",
+                    "alt": post.cover_image_alt,
                     "reading_time": post.reading_time,
                     "categories": [
                         {"id": cat.id, "name": cat.name} for cat in post.categories.all()
@@ -37,13 +37,15 @@ class BlogView(View):
 class BlogPostView(DetailView):
     model = BlogPost
     template_name = 'blogpost.html'
-    context_object_name = 'post'
+    context_object_name = 'post'  # Keep 'post' as the object name for clarity
 
     def get_object(self):
         post_url = self.kwargs.get('post_url')
         post = get_object_or_404(BlogPost, post_url=post_url, status_live=True)
+        return post  # Return the BlogPost instance
 
-        if not post.status_live:
-            raise Http404("Post is not live")
-
-        return post
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Add the sections related to this post
+        context['sections'] = BlogSection.objects.filter(blog_post=self.object)
+        return context
