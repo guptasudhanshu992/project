@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 	<meta name="csrf-token" content="{{ csrf_token }}">
     <title>{% block title %}Price Action Repository!{% endblock title %}</title>
+	<script src="https://kit.fontawesome.com/8414073804.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css" integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous">
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
 	<link href='https://fonts.googleapis.com/css?family=Oswald' rel='stylesheet'>
@@ -19,6 +20,9 @@
 		};
 	</script>
 	 <style>
+		.btn {
+			border-radius:0;
+		}
 		.spinner-container {
 			position: fixed;
 			top: 0;
@@ -34,16 +38,15 @@
 	 </style>
 	 {% block stylecss %}
 	 {% endblock stylecss %}
+	 {% block headers %}
+	 {% endblock headers %}
 </head>
 <body>
     <div id="spinner-container" class="spinner-container flex-column">
         <div class="spinner-border text-success" style="width: 3rem; height: 3rem;" role="status"></div>
 		<div class="text-success"><b>Learn and Earn!</b></div>
     </div>
-
-	<div id="doc_body">
-	<div>
-		<nav class="px-5 navbar navbar-expand-lg navbar-light border-bottom d-flex align-items-center justify-content-center">
+		<nav class="px-5 navbar navbar-expand-lg navbar-light d-flex align-items-center justify-content-center">
 			<a class="navbar-brand d-flex align-items-center justify-content-center" href="" style="font-family: Oswald;">
 				<img src="{% static 'logo.svg' %}" width="45" height="45" class="d-inline-block align-top" alt="logo">
 				Price Action Repository
@@ -53,12 +56,19 @@
 			</button>
 			<div class="collapse navbar-collapse" id="navbarNav">
 				<ul class="navbar-nav ml-auto" style="font-family: Oswald;font-weight:700;">
+					{% if request.user.is_authenticated %}
 					<li class="nav-item mr-3 {% if request.resolver_match.url_name == 'home_view' %}active{% endif %}">
 						<a class="nav-link" href="{% url 'home_view' %}">HOME</a>
 					</li>
+					{% endif %}
 					<li class="nav-item mr-3 {% if request.resolver_match.url_name == 'blog_view' %}active{% endif %}">
 						<a class="nav-link" href="{% url 'blog_view' %}">BLOG</a>
 					</li>
+					{% if request.user.is_authenticated %}
+					<li class="nav-item mr-3 {% if request.resolver_match.url_name == 'course_view' %}active{% endif %}">
+						<a class="nav-link" href="{% url 'course_view' %}">COURSES</a>
+					</li>
+					{% endif %}
 					{% if request.user.is_authenticated %}
 						<li class="d-flex nav-item mr-3" id="myAccDropdown">
 							<div class="dropdown">
@@ -74,10 +84,10 @@
 								</div>
 							</div>
 						</li>
-					{% else %}
 						<li class="d-flex nav-item align-items-center" id="account_btns">
 							<div class="btn-group" role="group" aria-label="myaccount">
-								<a type="button" class="btn btn-success btn-sm" href="{% url 'register' %}">SIGN UP</a>
+								<a type="button" class="btn btn-success btn-sm"
+								 href="{% url 'register' %}">SIGN UP</a>
 								<a type="button" class="btn btn-outline-success btn-sm" href="{% url 'login' %}">SIGN IN</a>
 							</div>
 						</li>
@@ -109,10 +119,7 @@
 	{% endif %}
 
 	<section class="bg-light">
-		<div class="row pt-5 pb-5"
-		{% block bannerimg %}
-		style="background: url('{% static "banner_img.jpg" %}') no-repeat center center; background-size: cover;">
-		{% endblock bannerimg %}
+		<div class="row pt-5 pb-5">
 			<div class="col-12 text-center">
 				<h1 style="color:#333;"><strong>{% block sectionheading %}{% endblock sectionheading %}</strong></h1>
 				<p class="text-muted">{% block subsectionheading %}{% endblock subsectionheading %}</p>

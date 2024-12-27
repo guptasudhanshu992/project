@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{{ lesson_details.lesson_id }}<br>
+{{ lesson_details.chapter }}<br>
+{{ lesson_details.title }}<br>
+{{ lesson_details.content | safe }}<br>
+{{ lesson_details.order }}<br>
+{{ lesson_details.video_url }}<br>
+{{ lesson_details.created_at }}<br>
+{{ lesson_details.updated_at }}<br>
+
+{% endblock content %}

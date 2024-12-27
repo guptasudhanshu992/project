@@ -1,6 +1,5 @@
 from django.shortcuts import render, redirect
 from django.views import View
-from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth.models import User
 from django.core.validators import validate_email

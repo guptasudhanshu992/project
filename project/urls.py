@@ -24,6 +24,7 @@ urlpatterns = [
     path("", include("core.urls")),
     path("", include("accounts.urls")),
     path("", include("blog.urls")),
+    path("courses/", include("courses.urls")),
     path('trix-editor/', include('trix_editor.urls')),
 ]
 

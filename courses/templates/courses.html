@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block stylecss %}
+    <style>
+        .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .card img {
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover img {
+            transform: scale(1.1);
+        }
+    </style>
+{% endblock stylecss %}
+
+{% block bannerimg %}>{% endblock bannerimg %}
+{% block sectionheading %}Courses{% endblock sectionheading %}
+{% block subsectionheading %}Explore our extensively researched course for deep insights.{% endblock subsectionheading %}
+
+{% block content %}
+<div class="container my-5">
+    <form class="text-muted my-5" method="get" action="{% url 'blog_view' %}">
+        <p>Filter by Category:</p>
+        <select name="category_id" id="category-select">
+            <option value='0' selected>
+                All
+            </option>
+            {% for category in categories %}
+                <option value={{ category.id }}
+                    {% if category.id == selected_category %}selected{% endif %}>
+                    {{ category.name }}
+                </option>
+            {% endfor %}
+        </select>
+    </form>
+    <div id="posts-container" class="row row-cols-1 row-cols-md-3 g-4">
+        {% for course in live_courses %}
+        <div class="card m-3" style="max-width: 500px; border-radius: 20px;" data-toggle="tooltip"
+        title="{{ course.course_snippet | striptags }}">
+            <img src="{{ course.course_image.url }}" class="card-img-top p-3" alt="{{ course.alt }}" style="border-radius: 30px;">
+            <div class="card-body">
+                <h4 class="card-title font-weight-bold">{{ course.title }}</h4>
+                <p>{{ course.course_snippet | safe }}</p>
+                <p><b>${{ course.price }}</b></p>
+                <a href="{% url 'course_details_view' course_url=course.course_url %}" class="btn btn-primary btn-block" style="border-radius: 5px;">Add to Cart</a>
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+</div>
+{% endblock content %}

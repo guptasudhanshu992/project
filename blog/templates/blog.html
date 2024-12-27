@@ -46,8 +46,8 @@
         {% for post in live_posts %}
         <div class="col my-3">
             <a href="{% url 'blog_post_view' post_url=post.post_url %}" class="text-decoration-none">
-                <div class="card h-100">
-                    <img src="{{ post.image.url }}" class="card-img-top" alt="{{ post.alt }}">
+                <div class="card h-100" style="border-radius:0;">
+                    <img src="{{ post.image.url }}" class="card-img-top" style="border-radius:0;" alt="{{ post.alt }}">
                     <div class="card-body">
                         <h5 class="card-title text-dark">
                             <b>{{ post.title }}</b><br>
@@ -59,7 +59,7 @@
                         </h5>
                     </div>
                     <div class="card-footer">
-                        <small class="text-muted">{{ post.reading_time }} min</small>
+                        <small class="text-muted"><i class="fa-regular fa-clock mr-1"></i> {{ post.reading_time }} min</small>
                     </div>
                 </div>
             </a>
@@ -86,8 +86,8 @@
                 const postHtml = `
                 <div class="col my-3">
                     <a href="/blog/${post.post_url}" class="text-decoration-none">
-                        <div class="card h-100">
-                            <img src="${post.image}" class="card-img-top" alt="${post.alt}">
+                        <div class="card h-100" style="border-radius:0px;">
+                            <img src="${post.image}" class="card-img-top" style="border-radius:0px;" alt="${post.alt}">
                             <div class="card-body">
                                 <h5 class="card-title text-dark">
                                     <b>${post.title}</b><br>

@@ -16,8 +16,12 @@ class Category(models.Model):
             self.slug = slugify(self.name)
         super(Category, self).save(*args, **kwargs)
 
+    class Meta:
+        verbose_name_plural = "Category"
+
     def __str__(self):
         return self.name
+
 
 class BlogPost(models.Model):
     title = models.CharField(max_length=200, unique=True)
@@ -47,3 +51,5 @@ class BlogPost(models.Model):
 
     def __str__(self):
         return self.title
+
+

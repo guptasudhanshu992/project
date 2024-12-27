@@ -37,17 +37,14 @@ INSTALLED_APPS = [
     "core",
     "blog",
     "accounts",
+    "courses",
     "ckeditor",
-    "corsheaders",
-    "rest_framework",
-    "rest_framework_simplejwt",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "rest_framework_simplejwt.token_blacklist",
 ]
 
 MIDDLEWARE = [
