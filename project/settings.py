@@ -28,7 +28,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-%^+fffx19eo^4z41#lq*ykz%7lplkqs5ux_6$8e!ci%8@t@=uk"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG')
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = ['*']
 
@@ -91,10 +91,9 @@ if not DEBUG:
             "PASSWORD": os.getenv("DB_PASSWORD", default=""),
             "HOST": os.getenv("DB_HOST", default=""),
             "PORT": os.getenv("DB_PORT", default=""),
-
-            #"OPTIONS": {
-            #    "sql_mode": "STRICT_TRANS_TABLES",
-            #},
+            "OPTIONS": {
+                "sql_mode": "STRICT_TRANS_TABLES",
+            },
         }
     }
 else:
