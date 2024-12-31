@@ -30,6 +30,7 @@ class BlogPost(models.Model):
     post_url = models.SlugField(max_length=200, unique=True, blank=True)
     cover_image = models.ImageField(upload_to="media/blog_images/", blank=True, null=True)
     cover_image_alt = models.CharField(max_length=255, blank=True, null=True)
+    snippet = RichTextField(null=True, blank=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     updated_at = models.DateField(default=now)
     published_at = models.DateTimeField(default=now)

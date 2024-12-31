@@ -85,7 +85,7 @@ WSGI_APPLICATION = "project.wsgi.application"
 if not DEBUG:
     DATABASES = {
         "default": {
-            "ENGINE": os.getenv("DB_ENGINE", default="django.db.backends.sqlite3"),
+            "ENGINE": os.getenv("DB_ENGINE", default="django.db.backends.mysql"),
             "NAME": os.getenv("DB_NAME", default=""),
             "USER": os.getenv("DB_USER", default=""),
             "PASSWORD": os.getenv("DB_PASSWORD", default=""),
@@ -148,7 +148,7 @@ STATICFILES_DIRS = [
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

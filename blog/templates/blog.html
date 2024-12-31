@@ -20,6 +20,12 @@
         .card:hover img {
             transform: scale(1.1);
         }
+
+        asda {
+            color: inherit !important;
+            text-decoration: justify !important;
+        }
+
     </style>
 {% endblock stylecss %}
 
@@ -44,26 +50,32 @@
     </form>
     <div id="posts-container" class="row row-cols-1 row-cols-md-3 g-4">
         {% for post in live_posts %}
-        <div class="col my-3">
-            <a href="{% url 'blog_post_view' post_url=post.post_url %}" class="text-decoration-none">
-                <div class="card h-100" style="border-radius:0;">
-                    <img src="{{ post.cover_image.url }}" class="card-img-top" style="border-radius:0;" alt="{{ post.alt }}">
-                    <div class="card-body">
-                        <h5 class="card-title text-dark">
-                            <b>{{ post.title }}</b><br>
-                        </h5>
-                        <h5>
-                        {% for category in post.categories.all %}
-                            <span class="badge badge-secondary">{{ category.name }}</span>
-                        {% endfor %}
-                        </h5>
+            <div class="col my-3">
+                <a href="{% url 'blog_post_view' post_url=post.post_url %}" class="text-muted text-decoration-none">
+                    <div class="card h-100" style="border-radius:0;">
+                        <div style="overflow:hidden;">
+                            <img src="{{ post.cover_image.url }}" class="card-img-top" style="border-radius:0;" alt="{{ post.alt }}">
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title text-dark">
+                                <b>{{ post.title }}</b><br>
+                            </h5>
+                            <p>
+                            {% for category in post.categories.all %}
+                                <span class="badge badge-secondary">{{ category.name }}</span>
+                            {% endfor %}
+                            </p>
+                            {% if post.snippet %}
+                                <hr>
+                                <p style="text-align:justify !important;">{{ post.snippet | truncatechars:200 | safe }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="card-footer">
+                            <small class="text-muted"><i class="fa-solid fa-calendar-days mr-1"></i> {{ post.updated_at }} <i class="fa-regular fa-clock mr-1 ml-5"></i> {{ post.reading_time }} min</small>
+                        </div>
                     </div>
-                    <div class="card-footer">
-                        <small class="text-muted"><i class="fa-regular fa-clock mr-1"></i> {{ post.reading_time }} min</small>
-                    </div>
-                </div>
-            </a>
-        </div>
+                </a>
+            </div>
         {% endfor %}
     </div>
 </div>
@@ -85,21 +97,26 @@
             data.live_posts.forEach(post => {
                 const postHtml = `
                 <div class="col my-3">
-                    <a href="/blog/${post.post_url}" class="text-decoration-none">
-                        <div class="card h-100" style="border-radius:0px;">
-                            <img src="${post.image}" class="card-img-top" style="border-radius:0px;" alt="${post.alt}">
-                            <div class="card-body">
-                                <h5 class="card-title text-dark">
-                                    <b>${post.title}</b><br>
-                                </h5>
-                                <h5>
-                                    ${post.categories.map(category => `<span class="badge badge-secondary">${category.name}</span>`).join(' ')}
-                                </h5>
-                            </div>
-                            <div class="card-footer">
-                                <small class="text-muted">${post.reading_time} min</small>
-                            </div>
+                    <a href="/blog/${post.post_url}" class="text-muted text-decoration-none">
+                    <div class="card h-100" style="border-radius:0;">
+                        <div style="overflow:hidden;">
+                            <img src="${post.image}" class="card-img-top" style="border-radius:0;" alt="${post.alt}">
                         </div>
+                        <div class="card-body">
+                            <h5 class="card-title text-dark">
+                                <b>${post.title}</b><br>
+                            </h5>
+                            <p>
+                                ${post.categories.map(category => `<span class="badge badge-secondary">${category.name}</span>`).join(' ')}
+                            </p>
+                            <hr>
+                            <p style="text-align:justify !important;">${post.snippet || "" }</p>
+                        </div>
+                        <div class="card-footer">
+                            <small class="text-muted"><i class="fa-solid fa-calendar-days mr-1"></i> ${ post.updated_at } <i class="fa-regular fa-clock mr-1 ml-5"></i> ${ post.reading_time } min</small>
+                        </div>
+                    </div>
+
                     </a>
                 </div>`;
                 container.insertAdjacentHTML("beforeend", postHtml);

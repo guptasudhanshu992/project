@@ -24,6 +24,8 @@ class BlogView(View):
                     "image": post.cover_image.url if post.cover_image else "",
                     "alt": post.cover_image_alt,
                     "reading_time": post.reading_time,
+                    "snippet": post.snippet,
+                    "updated_at": post.updated_at,
                     "categories": [
                         {"id": cat.id, "name": cat.name} for cat in post.categories.all()
                     ],
@@ -37,15 +39,15 @@ class BlogView(View):
 class BlogPostView(DetailView):
     model = BlogPost
     template_name = 'blogpost.html'
-    context_object_name = 'post'  # Keep 'post' as the object name for clarity
+    context_object_name = 'post'
 
     def get_object(self):
         post_url = self.kwargs.get('post_url')
         post = get_object_or_404(BlogPost, post_url=post_url, status_live=True)
-        return post  # Return the BlogPost instance
+        return post
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Add the sections related to this post
+
         context['sections'] = BlogSection.objects.filter(blog_post=self.object)
         return context
