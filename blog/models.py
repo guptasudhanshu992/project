@@ -28,7 +28,7 @@ class Category(models.Model):
 class BlogPost(models.Model):
     title = models.CharField(max_length=200, unique=True)
     post_url = models.SlugField(max_length=200, unique=True, blank=True)
-    cover_image = models.ImageField(upload_to="media/blog_images/", blank=True, null=True)
+    cover_image = models.ImageField(upload_to="static/blog_images/", blank=True, null=True)
     cover_image_alt = models.CharField(max_length=255, blank=True, null=True)
     snippet = RichTextField(null=True, blank=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -51,7 +51,7 @@ class BlogSection(models.Model):
     blog_post = models.ForeignKey(BlogPost, on_delete=models.CASCADE, related_name="sections")
     section_title = models.CharField(max_length=255, null=True, blank=True)
     content_text = RichTextField(null=True, blank=True)
-    section_image = models.ImageField(upload_to='media/blog_images/', null=True, blank=True)
+    section_image = models.ImageField(upload_to='static/blog_images/', null=True, blank=True)
     section_image_alt = models.CharField(max_length=255, null=True, blank=True)
     section_video_url = models.URLField(max_length=500, null=True, blank=True)
 
