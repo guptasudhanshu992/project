@@ -95,30 +95,33 @@
             const container = document.getElementById("posts-container");
             container.innerHTML = "";
             data.live_posts.forEach(post => {
-                const postHtml = `
-                <div class="col my-3">
-                    <a href="/blog/${post.post_url}" class="text-muted text-decoration-none">
-                    <div class="card h-100" style="border-radius:0;">
-                        <div style="overflow:hidden;">
-                            <img src="${post.image}" class="card-img-top" style="border-radius:0;" alt="${post.alt}">
-                        </div>
-                        <div class="card-body">
-                            <h5 class="card-title text-dark">
-                                <b>${post.title}</b><br>
-                            </h5>
-                            <p>
-                                ${post.categories.map(category => `<span class="badge badge-secondary">${category.name}</span>`).join(' ')}
-                            </p>
-                            <hr>
-                            <p style="text-align:justify !important;">${post.snippet || "" }</p>
-                        </div>
-                        <div class="card-footer">
-                            <small class="text-muted"><i class="fa-solid fa-calendar-days mr-1"></i> ${ post.updated_at } <i class="fa-regular fa-clock mr-1 ml-5"></i> ${ post.reading_time } min</small>
-                        </div>
-                    </div>
+                const trimmedSnippet = post.snippet
+                ? `${post.snippet.substring(0, 200)}...`
+                : "";
 
-                    </a>
-                </div>`;
+                const postHtml = `
+                    <div class="col my-3">
+                        <a href="/blog/${post.post_url}" class="text-muted text-decoration-none">
+                            <div class="card h-100" style="border-radius:0;">
+                                <div style="overflow:hidden;">
+                                    <img src="${post.image}" class="card-img-top" style="border-radius:0;" alt="${post.alt}">
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title text-dark">
+                                        <b>${post.title}</b><br>
+                                    </h5>
+                                    <p>
+                                        ${post.categories.map(category => `<span class="badge badge-secondary">${category.name}</span>`).join(' ')}
+                                    </p>
+                                    <hr>
+                                    <p style="text-align:justify !important;">${trimmedSnippet || "" }</p>
+                                </div>
+                                <div class="card-footer">
+                                    <small class="text-muted"><i class="fa-solid fa-calendar-days mr-1"></i> ${ post.updated_at } <i class="fa-regular fa-clock mr-1 ml-5"></i> ${ post.reading_time } min</small>
+                                </div>
+                            </div>
+                        </a>
+                    </div>`;
                 container.insertAdjacentHTML("beforeend", postHtml);
             });
         })
