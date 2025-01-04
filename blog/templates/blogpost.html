@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Blog{% endblock title %}
 
@@ -36,7 +37,7 @@
 {% endblock stylecss %}
 
 {% block scriptjs %}
-<script src="/static/js/scrollspy.js" ></script>
+<script type="text/javascript" src="/static/js/scrollspy.js" ></script>
 <script type="text/javascript">
   $(document).ready(function() {
     $('#accordionExample').on('show.bs.collapse', function (e) {
@@ -58,11 +59,11 @@
 
 {% block content %}
 
-<div class="text-center">
-    <img src="{{ post.cover_image.url }}" class="img-fluid" style="width: 80%; height: auto;">
-</div>
+<!-- <div class="text-center">
+</div> -->
 <div class="container d-flex bg-white py-5" id="blog-container">
     <div class="flex-grow-1 col-md-8 text-justify" id="article-content">
+      <img src="{{ post.cover_image.url }}" class="img-fluid" style="width: 100%; height: auto;" loading="lazy">
         {% for section in sections %}
             <section id="{{ section.id }}" class="scrollspy-section">
                 {% if section.section_title %}
