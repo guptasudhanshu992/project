@@ -1,10 +1,8 @@
 from django.urls import path
-from .views import CourseView, CourseDetailsView, LessonView
+from .views import PublishedCourseCardsView, CourseOverviewAPIView
 
 
 urlpatterns = [
-    path('', CourseView.as_view(), name='course_view'),
-    path('<slug:course_url>/', CourseDetailsView.as_view(), name='course_details_view'),
-    path('<slug:course_url>/<int:lesson_id>/', LessonView.as_view(), name='lesson_view'),
-
+    path('coursecards/', PublishedCourseCardsView.as_view(), name='coursecardapi'),
+    path('coursess/<slug:slug>', CourseOverviewAPIView.as_view(), name='courseoverviewapi'),
 ]

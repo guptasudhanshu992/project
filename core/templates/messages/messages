@@ -1,6 +1,0 @@
-{
-    "already_logged_in_message_heading": "You are already logged in.",
-    "already_logged_in_message_text": "You are already logged in. If you want to log out and switch accounts, you can log out by clicking the button below.",
-    "login_required_message_heading": "You need to login to view this page.",
-    "login_required_message_text": "",
-}

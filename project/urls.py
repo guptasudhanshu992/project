@@ -16,16 +16,17 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from django.conf import settings
+from core.views import custom_404_view
 from django.conf.urls.static import static
+from django.conf import settings
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", include("core.urls")),
-    path("", include("accounts.urls")),
-    path("", include("blog.urls")),
-    path("courses/", include("courses.urls")),
-    path('trix-editor/', include('trix_editor.urls')),
-]
+    path("api/v1/auth/", include("userauthentication.urls")),
+    path("api/v1/blog/", include("blog.urls")),
+    path("api/v1/courses/", include("courses.urls")),
+    path("ckeditor5/", include('django_ckeditor_5.urls')),
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+handler404 = 'core.views.custom_404_view'

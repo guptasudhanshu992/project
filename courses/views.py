@@ -1,40 +1,51 @@
-from django.shortcuts import render
+from django.http import JsonResponse
 from django.views import View
-from .models import Course, Lesson
-from django.shortcuts import get_object_or_404
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from .models import Course, CourseCategory
+from .serializers import CourseSerializer, CategorySerializer
 from django.views.generic import DetailView
-from django.http import Http404
+from django.shortcuts import get_object_or_404
+from rest_framework import status
+import time
 
-class CourseView(View):
-    def get(self, request):
-        live_courses = Course.objects.all()
-        context = {
-            "live_courses":live_courses,
+class PublishedCourseCardsView(View):
+    def get(self, request, *args, **kwargs):
+        page = request.GET.get('page', 1)
+        page_size = request.GET.get('page_size', 12)
+        category = request.GET.get('category', 'all')
+        
+        queryset = Course.objects.filter(status='published').order_by('-published_at')
+        if category and category.lower() != "all":
+            queryset = queryset.filter(category__name__iexact=category)
+
+        paginator = Paginator(queryset, page_size)
+        try:
+            blogs = paginator.page(page)
+        except PageNotAnInteger:
+            blogs = paginator.page(1)
+        except EmptyPage:
+            blogs = paginator.page(paginator.num_pages)
+
+        serializer = CourseSerializer(blogs, many=True)
+
+        categories = CourseCategory.objects.all()
+        category_serializer = CategorySerializer(CourseCategory.objects.all(), many=True)
+        
+        response = {
+            'data': serializer.data,
+            'categories': category_serializer.data,
+            'pagination': {
+                'total_pages': paginator.num_pages,
+                'current_page': blogs.number,
+                'has_next': blogs.has_next(),
+                'has_previous': blogs.has_previous(),
+                'total_items': paginator.count,
+            }
         }
+        return JsonResponse(response, safe=False)
 
-        return render(request, 'courses.html', context)
-
-class CourseDetailsView(DetailView):
-    model = Course
-    template_name = 'course_details.html'
-    context_object_name = 'course_details'
-
-    def get_object(self):
-        course_url = self.kwargs.get('course_url')
-        course_details = get_object_or_404(Course, course_url=course_url, status_live=True)
-
-        if not course_details.status_live:
-            raise Http404("Course is not live")
-
-        return course_details
-
-class LessonView(DetailView):
-    model = Lesson
-    template_name = 'lesson.html'
-    context_object_name = 'lesson_details'
-
-    def get_object(self):
-        lesson_id = self.kwargs.get('lesson_id')
-        lesson_details = get_object_or_404(Lesson, id=lesson_id)
-
-        return lesson_details
+class CourseOverviewAPIView(View):
+    def get(self, request, slug):
+        course = get_object_or_404(Course, slug=slug)
+        serializer = CourseSerializer(course)
+        return JsonResponse(serializer.data, status=status.HTTP_200_OK)

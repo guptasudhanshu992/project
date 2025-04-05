@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block extra_head %}
+<style>
+.header{
+	background:
+	radial-gradient(black 15%, transparent 16%) 0 0,
+	radial-gradient(black 15%, transparent 16%) 8px 8px,
+	radial-gradient(rgba(255,255,255,.1) 15%, transparent 20%) 0 1px,
+	radial-gradient(rgba(255,255,255,.1) 15%, transparent 20%) 8px 9px;
+	background-color:#282828;
+	background-size:16px 16px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+	<div class="d-flex flex-column align-items-center bg-dark justify-content-center py-5 border-bottom border-5 header">
+		<h1 class="text-white fw-bold">Courses</h1>
+		<p class="text-white">Learn and Grow</p>
+	</div>
+		
+	<div class="d-flex align-items-center justify-content-center w-100 py-3">
+		<div class="btn-group py-2" role="group" aria-label="Basic radio toggle button group" id="category-filter">
+		</div>
+	</div>
+
+	<div class="container my-5">
+		<div class="row g-4" id="post-container">
+			<div id="content-loader" class="d-flex justify-content-center align-items-center position-absolute start-0">
+				<span class="mx-2 text-success">Fetching Courses...</span>
+				<div class="spinner-border text-success" role="status">
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<nav aria-label="Page navigation">
+		<ul class="pagination justify-content-center" id="pagination-container">
+		</ul>
+	</nav>
+{% endblock content %}
+
+{% block extra_scripts %}
+    <script>
+	var blogPosts = [];
+	var currentCategory = '';
+	
+    $(document).ready(function () {
+		fetchPosts(1, 'all');
+    });
+	
+	function fetchPosts(page_number, category){
+		$('#content-loader').toggle();
+		url="{% url 'coursecardapi' %}?page=" + page_number + "&category=" + category;
+	
+		fetch(url)
+			.then(response => {
+				if (!response.ok) {
+					throw new Error(`HTTP error! Status: ${response.status}`);
+				}
+				return response.json();
+			})
+			.then(response => {
+				console.log(response);
+				course_list = response.data;
+				pagination = response.pagination;
+				categories = response.categories;
+				console.log(course_list);
+				console.log(pagination);
+				console.log(categories);
+				create_category_filters(categories);
+				displayBlogCards(course_list);
+				setupPagination(pagination.total_pages, pagination.current_page);
+				
+				const buttons = document.querySelectorAll('#category-filter .btn');
+				buttons.forEach(btn => btn.classList.remove('active'));
+
+				const activeButton = document.getElementById(category);
+				if (activeButton) {
+					activeButton.classList.add('active');
+				}
+			})
+			.catch(error => {
+				console.error('Error fetching courses:', error);
+			})
+			.finally(()=>{
+				$('#content-loader').remove();
+			});
+	}
+	
+	function parseSnippet(snippetJson) {
+		const snippet = JSON.parse(snippetJson);
+		return snippet.content.map(item => item.text).join(' ');
+	}
+	
+	function create_category_filters(categories){
+		const uniqueCategories = new Set();
+		categories.forEach((category)=> {
+			if (category.name) {
+				uniqueCategories.add(category.name);
+			}
+		});
+		
+		document.getElementById('category-filter').innerHTML=`<button class="btn btn-outline-success border-0 cat-item" for="all" id="all" onclick='fetchPosts(1, this.id);'>All</button>`;
+
+		category_tag=``;
+		uniqueCategories.forEach(category => {
+		category_tag += `<button class="btn btn-outline-success border-0" for="${category}" id="${category}" onclick="fetchPosts(1, this.id);">${category}</button>`;
+		});
+
+		document.getElementById('category-filter').innerHTML += category_tag;
+	}
+	
+	function displayBlogCards(course_list) {
+		const courseContainer = $('#post-container');
+		courseContainer.empty();
+		
+		course_list.forEach(course => {
+		console.log(course.course_category);
+		const imageUrl = course.course_image ? course.course_image : "{% static '404.svg' %}";
+		console.log("featured image:"+course.course_image+" Image URL: " + imageUrl);
+		const short_description = course.short_description;
+		console.log(short_description);
+		const publishedDate = new Date(course.published_at).toLocaleDateString();
+		console.log(publishedDate);
+		const slug = course.course_url;
+		console.log("Slug:"+slug);
+		let categoryBadges = `<span class="badge rounded-0 mr-1 p-2" style="background-color:#C84C05;background-size:'contain';margin:-10px;">${course.course_category.name}</span>`;
+		
+		const courseCard = `
+		<div class="col-md-4">
+			<div class="card shadow-sm rounded-0">
+				<div class="bg position-relative lazy-load" style="background-image:url('${imageUrl}'); background-size:cover; background-position:center; height:250px;">
+					<div class="position-absolute top-0 start-0 p-2">
+					${categoryBadges}
+					</div>
+					<footer class="position-absolute bottom-0 w-100 d-flex align-items-center justify-content-center text-white" style="background: rgba(0, 0, 0, 0.7);">
+						<p class="py-3 px-2 m-0">&#128197; Updated: ${new Date(course.published_at).toLocaleDateString()}
+					</footer>
+				</div>
+
+				<div class="card-body" style="border-radius:0;">
+					<h5 class="card-title text-dark fw-bold">${course.title}</h5>
+					<p class="card-text text-justify  text-muted">
+					  ${short_description}
+					</p>
+					<a href="/courses/${slug}" class="btn btn-outline-success">Read More &rarr;</a>
+				</div>
+			</div>
+		</div>`;
+
+		courseContainer.append(courseCard);
+		});
+	}
+	
+	function setupPagination(totalPages, currentPage) {
+		const paginationContainer = $('#pagination-container');
+		
+		paginationContainer.empty();
+		let paginationHTML = '';
+		
+		if (totalPages>1){		
+			for (let i = 1; i <= totalPages; i++) {
+				paginationHTML += `
+					<li class="page-item ${i === currentPage ? 'active' : ''}">
+						<button class="btn btn-outline-success ${i === currentPage ? 'active' : ''} rounded-0" onclick="fetchPosts(${i}, '${currentCategory}')">${i}</button>
+					</li>`;
+			}
+		}
+		
+		paginationContainer.html(paginationHTML);	
+	}
+	
+	document.addEventListener("DOMContentLoaded", function () {
+    const lazyLoadElements = document.querySelectorAll(".lazy-load");
+
+    const observer = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                let div = entry.target;
+                let bgImage = div.getAttribute("data-bg");
+
+                if (bgImage) {
+                    div.style.backgroundImage = `url('${bgImage}')`;
+                    div.removeAttribute("data-bg");
+                }
+
+                observer.unobserve(div);
+            }
+        });
+    }, { rootMargin: "100px" });
+
+    lazyLoadElements.forEach(div => observer.observe(div));
+	});
+
+</script>
+{% endblock %}

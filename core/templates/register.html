@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+
+{% block extra_head %}
+<style>
+.header{
+	background:
+	radial-gradient(black 15%, transparent 16%) 0 0,
+	radial-gradient(black 15%, transparent 16%) 8px 8px,
+	radial-gradient(rgba(255,255,255,.1) 15%, transparent 20%) 0 1px,
+	radial-gradient(rgba(255,255,255,.1) 15%, transparent 20%) 8px 9px;
+	background-color:#282828;
+	background-size:16px 16px;
+}
+#terms_accepted{
+	transition: all 0.2s ease;
+}
+#terms_accepted:checked{
+	background-color: #198754 !important;
+	border-color: #198754 !important;
+	box-shadow: none;
+}
+#terms_accepted:focus {
+	background-color:#198754;
+	outline: none;
+	box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.5);
+}
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column align-items-center justify-content-center header py-5">
+	<h1 class="fw-bold text-white">Create a New Account</h1>
+	<p class="text-white">Joins Us and prepare yourself for the financial wisdom!</p>
+</div>
+	
+<section class="py-3 py-md-5 py-xl-8">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-lg-10 col-xl-8">
+        <div class="row gy-5 justify-content-center">
+          <div class="col-12 col-lg-5">
+			<form action="{% url 'registerapi' %}" id="signupForm" method="POST">
+				{% csrf_token %}
+              <div class="row gy-3 overflow-hidden">
+                <div class="col-12">
+				  <div class="form-floating mb-3">
+                    <input type="email" class="form-control border-0 border-bottom rounded-0" name="email" id="email" placeholder="name@example.com" required>
+                    <label for="email" class="form-label">Email</label>
+					<div id="signupEmailError" class="text-danger small error-message"></div>
+                  </div>
+                  <div class="form-floating mb-3">
+                    <input type="password" class="form-control border-0 border-bottom rounded-0" name="password" id="password" value="" placeholder="Password" required>
+                    <label for="password" class="form-label">Password</label>
+                    <div id="signupPasswordError" class="text-danger small error-message"></div>
+                  </div>
+				  <div class="form-floating mb-3">
+                    <input type="password" class="form-control border-0 border-bottom rounded-0" name="confirm_password" id="confirm_password" value="" placeholder="Password" required>
+                    <label for="password" class="form-label">Confirm Password</label>
+                    <div id="signupConfirmPasswordError" class="text-danger small error-message"></div>
+                  </div>
+                  <div class="row justify-content-between">
+                    <div>
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value="" name="terms_accepted" id="terms_accepted">
+                        <label class="form-check-label text-secondary" for="terms_accepted">
+                          Tick to agree to the <a class='link link-success' href='/termsandconditions' target='_blank' rel='noopener noreferrer'>Terms and Conditions</a>.
+                        </label>
+						<div id="signupTermsError" class="text-danger small error-message"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-12">
+                  <div class="d-grid">
+                    <button class="btn btn-lg btn-success rounded-0 fs-6" id="registerbtn" type="submit">Create a new account <span id="btnspinner" class="spinner-border spinner-border-sm d-none" role="status"></span></button>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="col-12 col-lg-2 d-flex align-items-center justify-content-center gap-3 flex-lg-column">
+            <div class="bg-dark h-100 d-none d-lg-block" style="width: 1px; --bs-bg-opacity: .1;"></div>
+            <div class="bg-dark w-100 d-lg-none" style="height: 1px; --bs-bg-opacity: .1;"></div>
+            <div>or</div>
+            <div class="bg-dark h-100 d-none d-lg-block" style="width: 1px; --bs-bg-opacity: .1;"></div>
+            <div class="bg-dark w-100 d-lg-none" style="height: 1px; --bs-bg-opacity: .1;"></div>
+          </div>
+          <div class="col-12 col-lg-5 d-flex align-items-center">
+            <div class="d-flex gap-3 flex-column w-100 ">
+              <a href="#!" class="btn bsb-btn-2xl btn-outline-danger rounded-0 d-flex align-items-center">
+                <i class="fa-brands fa-google"></i>
+                <span class="ms-2 fs-6 flex-grow-1">Continue with Google</span>
+              </a>
+              <a href="#!" class="btn bsb-btn-2xl btn-outline-dark rounded-0 d-flex align-items-center">
+				<i class="fa-brands fa-apple"></i>
+                <span class="ms-2 fs-6 flex-grow-1">Continue with Apple</span>
+              </a>
+              <a href="#!" class="btn bsb-btn-2xl btn-outline-primary rounded-0 d-flex align-items-center">
+				<i class="fa-brands fa-facebook-f"></i>
+                <span class="ms-2 fs-6 flex-grow-1">Continue with Facebook</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock content %}
+
+{% block extra_scripts %}
+    <script>
+    $(document).ready(function () {
+        $("#signupForm").on("submit", function (e) {
+            e.preventDefault();
+			
+			const registerbtn = document.getElementById('registerbtn');
+			const btnspinner = document.getElementById('btnspinner');
+			
+			btnspinner.classList.remove('d-none');
+			registerbtn.disabled=true;
+			
+            let isValid = true;
+            $(".error-message").text("");
+
+            const email = $("#email").val().trim();
+            const password = $("#password").val().trim();
+            const confirm_password = $("#confirm_password").val().trim();
+            const termsAccepted = $("#terms_accepted").is(":checked");
+			const csrf_token = $("input[name=csrfmiddlewaretoken]").val();
+			const userData = {
+				email: email,
+				password: password,
+				confirm_password: confirm_password,
+				terms: termsAccepted
+			};
+
+            if (email === "") {
+                $("#signupEmailError").text("Email is required.");
+                isValid = false;
+            } else if (!/^\S+@\S+\.\S+$/.test(email)) {
+                $("#signupEmailError").text("Enter a valid email address.");
+                isValid = false;
+            }
+
+            if (password === "") {
+                $("#signupPasswordError").text("Password is required.");
+                isValid = false;
+            } else if (password.length < 6) {
+                $("#signupPasswordError").text("Password must be at least 6 characters long.");
+                isValid = false;
+            }
+
+            if (confirm_password === "") {
+                $("#signupConfirmPasswordError").text("Confirm Password is required.");
+                isValid = false;
+            } else if (password !== confirm_password) {
+                $("#signupConfirmPasswordError").text("Passwords do not match.");
+                isValid = false;
+            }
+
+            if (!termsAccepted) {
+                $("#signupTermsError").text("You must agree to the terms and conditions.");
+                isValid = false;
+            }
+
+            if (isValid) {
+				fetch('{% url "registerapi" %}', {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						'X-CSRFToken': getCookie('csrftoken')
+					},
+					body: JSON.stringify(userData),
+					credentials: 'include'
+				})
+				.then(response => {
+					if (!response.ok) {
+						return response.json().then(error => { throw error; });
+					}
+					return response.json();
+				})
+				.then(data => {
+					console.log('Registration successful : ', data.message);
+					alert('Registration successful : ' + data.message);
+					window.location.replace(data.redirect_url);
+				})
+				.catch(error => {
+					if (error.name === 'AbortError') {
+						alert('Request timed out. Please try again.');
+					} else {
+						console.error('Registration failed : ', error.message);
+						alert('Registration failed : ' + error.message);
+					}
+				})
+				.finally(() => {
+					registerbtn.disabled = false;
+					btnspinner.classList.add('d-none');
+				});
+			}
+        });
+
+		// Function to get the CSRF token from cookies
+		function getCookie(name) {
+			let cookieValue = null;
+			if (document.cookie && document.cookie !== '') {
+				const cookies = document.cookie.split(';');
+				for (const cookie of cookies) {
+					const trimmedCookie = cookie.trim();
+					if (trimmedCookie.startsWith(name + '=')) {
+						cookieValue = decodeURIComponent(trimmedCookie.substring(name.length + 1));
+						break;
+					}
+				}
+			}
+			return cookieValue;
+		}
+    });
+</script>
+{% endblock %}

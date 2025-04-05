@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+
+{% block extra_head %}
+    <style>
+		.header{
+			background:
+			radial-gradient(black 15%, transparent 16%) 0 0,
+			radial-gradient(black 15%, transparent 16%) 8px 8px,
+			radial-gradient(rgba(255,255,255,.1) 15%, transparent 20%) 0 1px,
+			radial-gradient(rgba(255,255,255,.1) 15%, transparent 20%) 8px 9px;
+			background-color:#282828;
+			background-size:16px 16px;
+		}
+        /* General Styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            scroll-behavior: smooth;
+            background-color: #f8f9fa;
+        }
+        
+        /* Sidebar Styling */
+        .sidebar {
+            max-height: 100vh;
+            overflow-y: auto;
+            background-color: #ffffff;
+            border-right: 1px solid #dee2e6;
+            padding: 1rem;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .sidebar .nav-link {
+            color: #495057;
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+
+        .sidebar .nav-link:hover {
+            background-color: #e9ecef;
+        }
+
+        .sidebar .nav-link.active {
+            background-color: #0d6efd;
+            color: white;
+        }
+
+        /* Content Area */
+        .content {
+            padding: 20px;
+        }
+
+        .content h2, .content h3 {
+            margin-top: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #0d6efd;
+        }
+
+        .blog-image {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 1rem auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .blog-video {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 1rem auto;
+        }
+
+        /* Mobile Adjustments */
+        @media (max-width: 991px) {
+            .sidebar {
+                position: relative;
+                max-height: none;
+                border-right: none;
+                border-bottom: 1px solid #dee2e6;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+	<!-- Page Header -->
+	<div class="header text-center text-light py-5">
+		<h1 class="pt-5 mt-5" id="title"></h1>
+		<p class="pb-5 mb-5" id="title-meta"></p>
+	</div>
+
+	<div class="container">
+		<div class="row mt-4">
+			<!-- Sidebar -->
+			<div class="col-md-3 col-lg-3 d-none d-md-block">
+				<div class="sticky-top">
+					<nav id="sidebar-nav" class="bg-light sidebar" style="list-style:none;">
+						<h4>On this Page...</h4>
+						<ul class="nav flex-column"></ul>
+					</nav>
+				</div>
+			</div>
+
+			<!-- Main Content -->
+			<main class="col-md-9 ms-sm-auto col-lg-9 px-md-4">
+				<div id="blog-content"></div>
+			</main>
+		</div>
+	</div>
+{% endblock %}
+
+
+{% block extra_scripts %}
+<script>
+	$(document).ready(function () {
+		let blog_title = window.location.pathname.split("/").filter(Boolean).pop();
+		let url = "/api/v1/blog/blog-articles/" + blog_title;
+		
+		fetch(url)
+			.then(response => {
+				if (!response.ok) {
+					throw new Error(`HTTP error! Status: ${response.status}`);
+				}
+				return response.json();
+			})
+			.then(response => {
+				
+				const dateObj = new Date(response.updated_at);
+				const formattedDate = dateObj.getDate().toString().padStart(2, '0') + "-" +
+				(dateObj.getMonth() + 1).toString().padStart(2, '0') + "-" +
+				dateObj.getFullYear();
+
+				title_meta = "Last Updated : " + formattedDate + " | Reading Time : " + response.reading_time + " min";
+				$('#title').html(response.title);
+				$('#title-meta').html(title_meta);
+				article_json=JSON.parse(response.content_json);
+				jsonToHtml(article_json.content, '#blog-content', '#sidebar-nav');
+			})
+			.catch(error => {
+				console.error('Error fetching article:', error);
+			});
+    });
+	
+	function jsonToHtml(json, contentContainer, sidebarContainer) {
+		let headingCounter = 0;
+
+		function createElement(item) {
+			let element;
+
+			switch (item.type) {
+				case "p":
+					element = $("<p>").text(item.text);
+					break;
+				case "image":
+					element = $("<img>").attr({"src": item.src, "alt": item.alt || "Image"}).addClass("blog-image");
+					break;
+				case "video":
+					element = $("<video>").attr({
+						"src": item.src,
+						"controls": item.controls !== undefined ? item.controls : true,
+						"autoplay": item.autoplay !== undefined ? item.autoplay : false
+					}).addClass("blog-video");
+					break;
+				default:
+					if (/^h[1-6]$/.test(item.type)) {
+						headingCounter++;
+						let headingId = `heading-${headingCounter}`;
+
+						// Create heading
+						let heading = $(`<${item.type}>`)
+							.attr("id", headingId)
+							.text(item.text)
+							.addClass("content-section");
+
+						// Create a wrapper div to hold heading + nested content
+						element = $("<div>").addClass("heading-wrapper").append(heading);
+
+						// Add heading to sidebar navigation
+						let sidebarItem = $("<li>").addClass("nav-item");
+						let sidebarLink = $("<a>")
+							.addClass("nav-link")
+							.attr("href", `#${headingId}`)
+							.text(item.text);
+
+						sidebarItem.append(sidebarLink);
+						$(sidebarContainer).append(sidebarItem);
+
+						// Append nested content outside the heading tag
+						if (item.content) {
+							let nestedContainer = $("<div>").addClass("nested-content");
+							item.content.forEach(child => nestedContainer.append(createElement(child)));
+							element.append(nestedContainer);
+						}
+					} else {
+						element = $("<div>").text("Unsupported content type: " + item.type);
+					}
+
+			}
+			return element;
+		}
+
+		if (json && Array.isArray(json)) {
+			json.forEach(item => {
+				$(contentContainer).append(createElement(item));
+			});
+		}
+	}
+
+</script>
+{% endblock %}
