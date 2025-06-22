@@ -33,14 +33,14 @@ class SessionAdmin(admin.ModelAdmin):
 
 class CustomUserAdmin(UserAdmin):
     model = NewUser
-    list_display = ('email', 'is_staff', 'is_active', 'is_verified', 'created_at')
+    list_display = ('email', 'source', 'is_staff', 'is_active', 'is_verified', 'created_at')
     list_filter = ('is_staff', 'is_active', 'is_verified')
     search_fields = ('email',)
     ordering = ('email',)
     readonly_fields = ('created_at', 'last_modified', 'last_login')
 
     fieldsets = (
-        (None, {'fields': ('email', 'password')}),
+        (None, {'fields': ('email', 'password', 'source')}),
         ('Permissions', {'fields': ('is_staff', 'is_active', 'is_verified', 'is_superuser', 'groups', 'user_permissions')}),
         ('Timestamps', {'fields': ('created_at', 'last_modified', 'last_login')}),
     )

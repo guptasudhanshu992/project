@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Wishlist | YourStore{% endblock %}
+
+{% block primarymetatags %}
+<meta name="description" content="Your saved wishlist items. Add them to your cart or remove them anytime." />
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    body {
+        background-color: #f9f9f9;
+    }
+
+    .wishlist-item img {
+        max-width: 80px;
+        height: auto;
+    }
+
+    .price {
+        font-weight: 600;
+    }
+
+    .remove-btn {
+        color: #dc3545;
+        cursor: pointer;
+    }
+
+    .add-to-cart-btn {
+        font-size: 0.9rem;
+    }
+
+    .wishlist-section {
+        background-color: #fff;
+        padding: 20px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.05);
+        border-radius: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="d-flex flex-column align-items-center bg-dark justify-content-center py-5 border-bottom border-5 header">
+	<h1 class="text-white fw-bold">Your Wishlist</h1>
+	<p class="text-white">Commitment and Consistency</p>
+</div>
+
+<div class="container py-5">
+    <div class="wishlist-section">
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th scope="col">Product</th>
+                        <th scope="col">Title</th>
+                        <th scope="col">Price</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="wishlist-items">
+                    <tr class="wishlist-item">
+                        <td><img src="https://via.placeholder.com/80" alt="Smartwatch" class="img-thumbnail" /></td>
+                        <td>Smartwatch Series 5</td>
+                        <td class="price">$129.00</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary add-to-cart-btn">Add to Cart</button>
+                            <span class="remove-btn ms-3" onclick="removeWishlistItem(this)">Remove</span>
+                        </td>
+                    </tr>
+
+                    <tr class="wishlist-item">
+                        <td><img src="https://via.placeholder.com/80" alt="Noise Cancelling Earbuds" class="img-thumbnail" /></td>
+                        <td>Noise Cancelling Earbuds</td>
+                        <td class="price">$89.00</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary add-to-cart-btn">Add to Cart</button>
+                            <span class="remove-btn ms-3" onclick="removeWishlistItem(this)">Remove</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    function removeWishlistItem(el) {
+        const row = el.closest('tr');
+        row.remove();
+    }
+
+    // You can expand this to actually move items to cart using localStorage or backend logic
+    const cartButtons = document.querySelectorAll('.add-to-cart-btn');
+    cartButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            alert('Item added to cart!');
+        });
+    });
+</script>
+{% endblock %}

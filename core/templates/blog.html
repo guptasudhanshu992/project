@@ -4,15 +4,15 @@
 
 {% block extra_head %}
 <style>
-.header{
-	background:
-	radial-gradient(black 15%, transparent 16%) 0 0,
-	radial-gradient(black 15%, transparent 16%) 8px 8px,
-	radial-gradient(rgba(255,255,255,.1) 15%, transparent 20%) 0 1px,
-	radial-gradient(rgba(255,255,255,.1) 15%, transparent 20%) 8px 9px;
-	background-color:#282828;
-	background-size:16px 16px;
-}
+	.header{
+		background:
+		radial-gradient(black 15%, transparent 16%) 0 0,
+		radial-gradient(black 15%, transparent 16%) 8px 8px,
+		radial-gradient(rgba(255,255,255,.1) 15%, transparent 20%) 0 1px,
+		radial-gradient(rgba(255,255,255,.1) 15%, transparent 20%) 8px 9px;
+		background-color:#282828;
+		background-size:16px 16px;
+	}
 </style>
 {% endblock %}
 
@@ -64,9 +64,12 @@
 				return response.json();
 			})
 			.then(response => {
-				blogPosts = response.data;
+				blogPosts = response.blog_posts;
 				pagination = response.pagination;
+				console.log(pagination);
 				categories = response.categories;
+				console.log("Categories::", categories);
+				console.log("Tags::", response.tags);
 				create_category_filters(categories);
 				displayBlogCards(blogPosts);
 				setupPagination(pagination.total_pages, pagination.current_page);
@@ -106,7 +109,7 @@
 		uniqueCategories.forEach(category => {
 		category_tag += `<button class="btn btn-outline-success border-0" for="${category}" id="${category}" onclick="fetchPosts(1, this.id);">${category}</button>`;
 		});
-
+		console.log("Category_Tag::", category_tag);
 		document.getElementById('category-filter').innerHTML += category_tag;
 	}
 	
@@ -115,9 +118,14 @@
 		blogContainer.empty();
 		
 		posts.forEach(post => {
-		const imageUrl = post.featured_image ? post.featured_image : "{% static '404.svg' %}";
-		console.log("featured image:"+post.featured_image+" Image URL: " + imageUrl);
-		const snippetText = parseSnippet(post.snippet_json);
+		console.log("Post::",post);
+		const imageUrl = post.cover_image ? post.cover_image : "{% static '404.svg' %}";
+		console.log("featured image:" + post.cover_image + " Image URL: " + imageUrl);
+		//let snippetText = parseSnippet(post.blog_snippet_json);
+		let snippetText = $('<div>').html(post.snippet).text();
+		maxSnippetLength = 200;
+		snippetText = snippetText.length > maxSnippetLength ? snippetText.substring(0, maxSnippetLength).trim() + '...' : snippetText;
+		console.log("Blog_Snippet:"+post.snippet);
 		const publishedDate = new Date(post.published_at).toLocaleDateString();
 		const slug = post.slug;
 		

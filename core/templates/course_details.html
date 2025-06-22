@@ -1,92 +1,415 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block headers %}
-<link href="https://vjs.zencdn.net/8.16.1/video-js.css" rel="stylesheet" />
-{% endblock headers %}
+{% block extra_head %}
+<title>{{ course_details.title|default:'Complete Python Masterclass' }} - CodeLingo | Interactive Programming Courses</title>
+
+<style>
+    .course-header {
+        background: linear-gradient(135deg, var(--bs-success) 0%, #28a745 100%);
+    }
+    
+    .video-placeholder {
+        background: linear-gradient(135deg, #212529 0%, #343a40 100%);
+    }
+    
+    .play-button {
+        width: 80px;
+        height: 80px;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 50%;
+        cursor: pointer;
+    }
+    
+    .lesson-item.active {
+        background-color: rgba(25, 135, 84, 0.1);
+        border-left: 4px solid var(--bs-success);
+    }
+    
+    .header {
+        background: radial-gradient(black 15%, transparent 16%) 0 0,
+                    radial-gradient(black 15%, transparent 16%) 8px 8px,
+                    radial-gradient(rgba(255, 255, 255, .1) 15%, transparent 20%) 0 1px,
+                    radial-gradient(rgba(255, 255, 255, .1) 15%, transparent 20%) 8px 9px;
+        background-color: #282828;
+        background-size: 16px 16px;
+    }
+
+    /* Enhanced Course Tab Styles */
+    .course-nav-tabs {
+        border-bottom: 2px solid #e9ecef;
+        padding-bottom: 0;
+    }
+
+    .course-nav-tabs .nav-link {
+        position: relative;
+        color: #6c757d;
+        font-weight: 500;
+        font-size: 1.1rem;
+        padding: 1rem 1.5rem;
+        margin-right: 0.5rem;
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+
+    /* Hover Effects */
+    .course-nav-tabs .nav-link:hover {
+        color: #198754;
+        background: linear-gradient(135deg, rgba(25, 135, 84, 0.05) 0%, rgba(25, 135, 84, 0.1) 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(25, 135, 84, 0.15);
+    }
+
+    /* Active State */
+    .course-nav-tabs .nav-link.active {
+        color: #198754;
+        background: linear-gradient(135deg, rgba(25, 135, 84, 0.1) 0%, rgba(25, 135, 84, 0.05) 100%);
+        border-bottom: 3px solid #198754;
+        font-weight: 600;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(25, 135, 84, 0.2);
+    }
+
+    /* Animated underline effect */
+    .course-nav-tabs .nav-link::before {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        width: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #198754, #20c997);
+        transform: translateX(-50%);
+        transition: width 0.3s ease;
+    }
+
+    .course-nav-tabs .nav-link:hover::before {
+        width: 80%;
+    }
+
+    .course-nav-tabs .nav-link.active::before {
+        width: 100%;
+    }
+
+    /* Ripple effect on click */
+    .course-nav-tabs .nav-link::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        background: rgba(25, 135, 84, 0.3);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .course-nav-tabs .nav-link:active::after {
+        width: 200px;
+        height: 200px;
+    }
+
+    .tab-content {
+        animation: fadeInUp 0.5s ease-out;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .tab-pane {
+        opacity: 0;
+        transform: translateY(10px);
+        transition: all 0.3s ease;
+    }
+
+    .tab-pane.active {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* Focus states for accessibility */
+    .course-nav-tabs .nav-link:focus {
+        outline: 2px solid #198754;
+        outline-offset: 2px;
+        box-shadow: 0 0 0 3px rgba(25, 135, 84, 0.1);
+    }
+
+	.video-js {
+	  width: 100% !important;
+	  height: 100% !important;
+	}
+	
+	.vjs-big-play-button {
+		display: none !important;
+	}
+
+    /* Mobile responsive adjustments */
+    @media (max-width: 768px) {
+        .course-nav-tabs .nav-link {
+            font-size: 1rem;
+            padding: 0.75rem 1rem;
+            margin-right: 0.25rem;
+        }
+    }
+</style>
+<link href="https://vjs.zencdn.net/8.9.0/video-js.css" rel="stylesheet" />
+<script src="https://vjs.zencdn.net/8.9.0/video.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/videojs-youtube/dist/Youtube.min.js"></script>
+{% endblock %}
 
 {% block content %}
-<div class="container">
-  <div class="row">
-    <div class="col-md-7">
-      <ul class="nav nav-tabs" id="myTab" role="tablist">
-        <li class="nav-item" role="presentation">
-          <button class="nav-link" id="profile-tab" data-toggle="tab" data-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="true">Learning Outcome</button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button class="nav-link" id="contact-tab" data-toggle="tab" data-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">Pre-requisites</button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button class="nav-link" id="long_description-tab" data-toggle="tab" data-target="#long_description" type="button" role="tab" aria-controls="long_description" aria-selected="false">Long Description</button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button class="nav-link" id="course_content-tab" data-toggle="tab" data-target="#course_content" type="button" role="tab" aria-controls="course_content" aria-selected="false">Course Contents</button>
-        </li>
-      </ul>
-
-      <div class="tab-content" id="myTabContent">
-        <div class="tab-pane show active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-          {{ course_details.learning_outcomes | safe }}
-        </div>
-        <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
-          {{ course_details.pre_requisites | safe }}
-        </div>
-        <div class="tab-pane fade" id="long_description" role="tabpanel" aria-labelledby="long_description-tab">
-          {{ course_details.short_description | safe }}
-          {{ course_details.long_description | safe }}
-        </div>
-        <div class="tab-pane fade" id="course_content" role="tabpanel" aria-labelledby="course_content-tab">
-          <div id="accordion">
-            {% for chapter in course_details.course_content %}
-            <div class="card mb-2">
-              <div class="card-header p-2" id="heading_{{ forloop.counter }}">
-                <h6 class="mb-0">
-                  <button class="btn btn-link text-left" style="width: 100%;" data-toggle="collapse" data-target="#collapse_{{ forloop.counter }}" aria-expanded="false" aria-controls="collapse_{{ forloop.counter }}">
-                    {{ chapter.chapter_name }}
-                  </button>
-                </h6>
-              </div>
-              <div id="collapse_{{ forloop.counter }}" class="collapse" aria-labelledby="heading_{{ forloop.counter }}" data-parent="#accordion">
-                <div class="card-body p-2">
-                  <ul class="list-unstyled">
-                    {% for lesson in chapter.lessons %}
-                    <li>
-                      <a href="{% url 'lesson_view' course_details.course_url lesson.lesson_id %}">{{ lesson.lesson_name }}</a>
-                    </li>
-                    {% endfor %}
-                  </ul>
+    <section class="course-header text-white py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8">
+                    <h1 class="display-4 fw-bold mb-3">{{ course_details.title }}</h1>
+                    <p class="fs-5 opacity-75 mb-4">{{ course_details.short_description | safe }}</p>
+						{% if course_details.rating or course_details.reviews or course_details.enrollments or course_details.duration or course_details.has_certificate %}
+							<div class="d-flex flex-wrap gap-3">
+								{% if course_details.rating or course_details.reviews %}
+									<div class="d-flex align-items-center gap-2 bg-white bg-opacity-10 px-3 py-2">
+										<i class="fas fa-star text-warning"></i>
+										<span>
+											{{ course_details.rating|default:'4.8' }}
+											{% if course_details.reviews %} ({{ course_details.reviews }} reviews){% endif %}
+										</span>
+									</div>
+								{% endif %}
+								{% if course_details.enrollments %}
+									<div class="d-flex align-items-center gap-2 bg-white bg-opacity-10 px-3 py-2">
+										<i class="fas fa-users"></i>
+										<span>{{ course_details.enrollments }} students</span>
+									</div>
+								{% endif %}
+								{% if course_details.duration %}
+									<div class="d-flex align-items-center gap-2 bg-white bg-opacity-10 px-3 py-2">
+										<i class="fas fa-clock"></i>
+										<span>{{ course_details.duration|floatformat:0 }} hours content</span>
+									</div>
+								{% endif %}
+								{% if course_details.has_certificate %}
+									<div class="d-flex align-items-center gap-2 bg-white bg-opacity-10 px-3 py-2">
+										<i class="fas fa-certificate"></i>
+										<span>Certificate included</span>
+									</div>
+								{% endif %}
+							</div>
+						{% endif %}
                 </div>
-              </div>
             </div>
-            {% endfor %}
-          </div>
         </div>
-      </div>
-    </div>
+    </section>
 
-    <div class="col-md-5">
-      <div class="sidebar bg-light p-3" style="border-left: 1px solid #ddd;">
-        <video
-          id="my-video"
-          class="video-js mb-3"
-          controls
-          preload="auto"
-          width="100%"
-          height="auto"
-          poster="MY_VIDEO_POSTER.jpg"
-          data-setup="{}">
-          <source src="/media/media/videoplayback.mp4" type="video/mp4" />
-          <p class="vjs-no-js">
-            To view this video please enable JavaScript, and consider upgrading to a
-            web browser that
-            <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>.
-          </p>
-        </video>
-        <!-- <iframe src="{{ course_details.preview_video }}" width="100%" height="auto" frameborder="0" allow="autoplay; fullscreen; picture-in-picture; clipboard-write" title="video1"></iframe> -->
-         <button class="btn btn-success btn-block btn-lg pb-3">Enroll</button>
-        <p><strong>Price:</strong> {{ course_details.price }}</p>
-        <p><strong>Language:</strong> {{ course_details.language }}</p>
-      </div>
-    </div>
-  </div>
-</div>
-{% endblock content %}
+    <section class="py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8">
+					<main class="flex-grow-1" id="topic-content">
+					  <div class="bg-dark position-relative mb-4" style="aspect-ratio: 16/9;">
+						<div class="video-placeholder d-flex align-items-center justify-content-center h-100">
+						  <video
+							id="my-video"
+							class="video-js vjs-default-skin"
+							controls
+							width="100%"
+							height="auto"
+							poster="MY_VIDEO_POSTER.jpg"
+							data-setup='{
+							  "techOrder": ["youtube"],
+							  "sources": [{
+								"type": "video/youtube",
+								"src": "https://www.youtube.com/watch?v=gEV_Po7PeIY"
+							  }],
+							  "youtube": {
+								"modestbranding": 1,
+								"rel": 0,
+								"showinfo": 0
+							  }
+							}'>
+						  </video>
+						</div>
+					  </div>
+					</main>
+
+
+                    <div class="bg-white shadow-sm border mb-4 p-4">
+                        <ul class="nav course-nav-tabs" id="courseTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab" aria-controls="overview" aria-selected="true">
+                                    <i class="fas fa-info-circle me-2"></i>Overview
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="curriculum-tab" data-bs-toggle="tab" data-bs-target="#curriculum" type="button" role="tab" aria-controls="curriculum" aria-selected="false">
+                                    <i class="fas fa-list-ul me-2"></i>Curriculum
+                                </button>
+                            </li>
+                        </ul>
+                        <div class="tab-content pt-4" id="courseTabContent">
+                            <div class="tab-pane fade show active" id="overview" role="tabpanel" aria-labelledby="overview-tab">
+                                <h3 class="mb-3">What you'll learn</h3>
+									{% if course_details.learning_outcomes.all %}
+										<ul class="row list-unstyled">
+											{% for outcome in course_details.learning_outcomes.all %}
+												<li class="col-md-6 d-flex align-items-start mb-2">
+													<i class="fas fa-check-circle text-success me-2 mt-1"></i>
+													{{ outcome.description }}
+												</li>
+											{% endfor %}
+										</ul>
+									{% endif %}
+                                <h3 class="mt-4 mb-3">Course Description</h3>
+                                <p class="lh-lg text-dark">{{ course_details.long_description | safe }}</p>
+                            </div>
+                            <div class="tab-pane fade" id="curriculum" role="tabpanel" aria-labelledby="curriculum-tab">
+								<div class="accordion" id="courseCurriculum">
+									{% for chapter in course_details.course_structure.chapters %}
+									<div class="accordion-item border mb-3 rounded-0">
+										<h2 class="accordion-header" id="heading{{ forloop.counter }}">
+											<button class="accordion-button {% if not forloop.first %}collapsed{% endif %} bg-light fw-semibold rounded-0"
+													type="button"
+													data-bs-toggle="collapse"
+													data-bs-target="#collapse{{ forloop.counter }}"
+													aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}"
+													aria-controls="collapse{{ forloop.counter }}">
+												{{ chapter.title }} ({{ chapter.topics|length }} Lessons)
+											</button>
+										</h2>
+										<div id="collapse{{ forloop.counter }}"
+											 class="accordion-collapse collapse {% if forloop.first %}show{% endif %}"
+											 aria-labelledby="heading{{ forloop.counter }}"
+											 data-bs-parent="#courseCurriculum">
+											<div class="accordion-body border-top bg-white">
+												<ul class="list-unstyled mb-0">
+													{% for topic in chapter.topics %}
+													<li class="py-2 {% if not forloop.last %}border-bottom border-light{% endif %}">
+														<i class="fas fa-play-circle text-success me-2"></i>
+														{{ forloop.counter }}. {{ topic.title }}
+													</li>
+													{% endfor %}
+												</ul>
+											</div>
+										</div>
+									</div>
+									{% endfor %}
+								</div>
+							</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="bg-light shadow-sm border p-4 mb-4">
+                        <div class="text-center mb-4">
+                            <div class="fs-1 fw-bold text-success">
+                                ${{ course_details.current_price|default:'89.99' }}
+                                <span class="fs-5 text-muted text-decoration-line-through ms-2">${{ course_details.original_price|default:'199.99' }}</span>
+                                <span class="badge bg-danger text-white ms-2 rounded-0">{{ course_details.discount_percentage|default:'55' }}% OFF</span>
+                            </div>
+                            <p class="text-muted mt-2">Limited time offer ends in 3 days</p>
+                        </div>
+
+						<button class="btn btn-success w-100 mb-3 py-3 fs-5 fw-bold"   onclick="Cart.addItem({id: '{{ course_details.id }}', title: '{{ course_details.title|escapejs }}', price: {{ course_details.price|default:0 }}, image: '{% if course_details.cover_image %}{{ course_details.cover_image.url }}{% else %}/static/img/default.jpg{% endif %}'
+						});">Enroll Now</button>
+                        <button class="btn btn-outline-success w-100 mb-3">Add to Wishlist</button>
+
+                        <div class="text-center mb-3">
+                            <small class="text-muted">30-day money-back guarantee</small>
+                        </div>
+
+                        <h6 class="mb-3">This course includes:</h6>
+						<ul class="list-unstyled">
+						  {% for feature in course_details.features.all %}
+							<li class="d-flex align-items-center gap-3 py-2 text-muted">
+							  <i class="{{ feature.icon }} text-success" style="width: 16px;"></i>
+							  {% if "on-demand video" in feature.description|lower %}
+								{{ course_details.duration|floatformat:0 }} hours {{ feature.description }}
+							  {% else %}
+								{{ feature.description }}
+							  {% endif %}
+							</li>
+						  {% endfor %}
+						</ul>
+                    </div>
+
+					<div class="bg-light shadow-sm border p-4 mb-4">
+						<h6 class="mb-3">Tags</h6>
+						<div class="d-flex flex-wrap gap-2">
+							{% for tag in course_details.tags.all %}
+								<span class="badge bg-light text-dark border">{{ tag.name }}</span>
+							{% empty %}
+								<span class="text-muted">No tags available</span>
+							{% endfor %}
+						</div>
+					</div>
+
+                    <div class="bg-light shadow-sm border p-4">
+                        <h6 class="mb-3">Course Stats</h6>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Skill Level</span>
+                            <span>{% for skilllevel in course_details.skilllevel.all %}
+								{{ skilllevel.name }}{% if not forloop.last %}, {% endif %}
+							{% endfor %}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Students</span>
+                            <span>{{ course_details.enrollments|default:'45,890' }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Languages</span>
+							<span>
+								{% for language in course_details.language.all %}
+									{{ language.name }}{% if not forloop.last %}, {% endif %}
+								{% endfor %}
+							</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">Last Updated</span>
+                            <span>{{ course_details.updated_at|date:"F d, Y" }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const playButton = document.querySelector('.play-button');
+            const videoPlayer = document.querySelector('.video-player');
+            const videoPlaceholder = document.querySelector('.video-placeholder');
+
+            if (playButton && videoPlayer) {
+                playButton.addEventListener('click', function() {
+                    const videoEmbedHtml = `
+                        <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1"
+                                frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowfullscreen style="position:absolute;top:0;left:0;width:100%;height:100%;"></iframe>
+                    `;
+                    videoPlayer.innerHTML = videoEmbedHtml;
+                });
+            }
+
+            const tabTriggers = document.querySelectorAll('[data-bs-toggle="tab"]');
+            tabTriggers.forEach(trigger => {
+                trigger.addEventListener('shown.bs.tab', function(e) {
+                    const targetPane = document.querySelector(e.target.getAttribute('data-bs-target'));
+                    if (targetPane) {
+                        targetPane.style.animation = 'fadeInUp 0.5s ease-out';
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock %}

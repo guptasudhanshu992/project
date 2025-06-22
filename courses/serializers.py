@@ -1,25 +1,43 @@
 from rest_framework import serializers
-from .models import Course, CourseCategory
+from .models import Course, Category, CourseTopic
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
-        model = CourseCategory
-        fields = ['category_id', 'name']
+        model = Category
+        fields = ['id', 'name']
         
 class CourseSerializer(serializers.ModelSerializer):
-    course_category = CategorySerializer(CourseCategory.objects.all(), many=False)
+    category = CategorySerializer()
 
     class Meta:
         model = Course
         fields = [
-            "course_id",
+            "id",
+            "slug",
             "title",
-            "course_url",
-            "course_image",
+            "cover_image",
             "price",
             "short_description",
+            "long_description",
+            "learning_outcomes",
+            "pre_requisites",
             "language",
             "preview_video",
-            "course_category",
+            "category",
+            "updated_at",
             "published_at"
+        ]
+
+class TopicSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CourseTopic
+        fields = [
+            "id",
+            "chapter",
+            "title",
+            "video_url",
+            "content",
+            "order",
+            "created_at",
+            "updated_at",
         ]

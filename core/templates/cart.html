@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Shopping Cart | YourStore{% endblock %}
+
+{% block primarymetatags %}
+<meta name="description" content="Review your shopping cart items, apply discount coupons, and proceed to checkout." />
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    body {
+        background-color: #f9f9f9;
+    }
+
+    .cart-item img {
+        max-width: 80px;
+        height: auto;
+    }
+
+    .price {
+        font-weight: 600;
+    }
+
+    .remove-btn {
+        color: #dc3545;
+        cursor: pointer;
+    }
+
+    .discount-box input {
+        max-width: 100%;
+    }
+
+    .sidebar {
+        background-color: #fff;
+        border-left: 1px solid #dee2e6;
+        padding: 20px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+
+    .total-section {
+        font-size: 1.2rem;
+    }
+
+    .checkout-btn {
+        font-size: 1.1rem;
+        width: 100%;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+	<div class="d-flex flex-column align-items-center bg-dark justify-content-center py-5 border-bottom border-5 header">
+		<h1 class="text-white fw-bold">Your Shopping Cart</h1>
+		<p class="text-white">Commitment and Consistency</p>
+	</div>
+	
+	<div class="container py-5">
+		<div class="row">
+			<div class="col-lg-8 mb-4">
+				<div class="card shadow-sm">
+					<div class="card-body">
+						<div class="table-responsive">
+							<table class="table align-middle">
+								<thead>
+									<tr>
+										<th scope="col">Thumbnail</th>
+										<th scope="col">Title</th>
+										<th scope="col">Price</th>
+										<th scope="col">Qty</th>
+										<th scope="col">Remove</th>
+									</tr>
+								</thead>
+								<tbody id="cart-items">
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="col-lg-4">
+				<div class="sidebar rounded shadow-sm">
+					<h5 class="mb-3">Apply Coupon</h5>
+					<div class="input-group discount-box mb-3">
+						<input type="text" class="form-control" placeholder="Enter coupon code" id="couponInput" />
+						<button class="btn btn-outline-success" onclick="applyDiscount()">Apply</button>
+					</div>
+					<div id="discountMessage" class="text-success small mb-3"></div>
+
+					<hr />
+
+					<div class="mb-2">Subtotal: <span id="subtotal">$0.00</span></div>
+					<div class="mb-2 text-success">Discount: <span id="discount">$0.00</span></div>
+					<div class="total-section fw-bold mb-3">Total: <span id="nettotal">$0.00</span></div>
+
+					<a href="/checkout" class="btn btn-success checkout-btn">Proceed to Checkout</a>
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+	renderCart('cart-items');
+	Cart.updateTotals();
+</script>
+{% endblock %}

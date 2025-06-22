@@ -41,6 +41,7 @@
 		<ul class="pagination justify-content-center" id="pagination-container">
 		</ul>
 	</nav>
+
 {% endblock content %}
 
 {% block extra_scripts %}
@@ -66,10 +67,13 @@
 			.then(response => {
 				console.log(response);
 				course_list = response.data;
+				
 				pagination = response.pagination;
 				categories = response.categories;
+				console.log("CourseList:");
 				console.log(course_list);
 				console.log(pagination);
+				console.log("Categories:");
 				console.log(categories);
 				create_category_filters(categories);
 				displayBlogCards(course_list);
@@ -119,16 +123,17 @@
 		courseContainer.empty();
 		
 		course_list.forEach(course => {
-		console.log(course.course_category);
-		const imageUrl = course.course_image ? course.course_image : "{% static '404.svg' %}";
-		console.log("featured image:"+course.course_image+" Image URL: " + imageUrl);
-		const short_description = course.short_description;
+		const imageUrl = course.cover_image ? course.cover_image : "{% static '404.svg' %}";
+		console.log("featured image:" + course.cover_image+" Image URL: " + imageUrl);
+		let short_description = course.short_description;
+		maxdescrLength = 200;
+		short_description = short_description.length > maxdescrLength ? short_description.substring(0, maxdescrLength).trim() + '...' : short_description;
 		console.log(short_description);
 		const publishedDate = new Date(course.published_at).toLocaleDateString();
 		console.log(publishedDate);
-		const slug = course.course_url;
+		const slug = course.slug;
 		console.log("Slug:"+slug);
-		let categoryBadges = `<span class="badge rounded-0 mr-1 p-2" style="background-color:#C84C05;background-size:'contain';margin:-10px;">${course.course_category.name}</span>`;
+		let categoryBadges = `<span class="badge rounded-0 mr-1 p-2" style="background-color:#C84C05;background-size:'contain';margin:-10px;">${course.category.name}</span>`;
 		
 		const courseCard = `
 		<div class="col-md-4">
@@ -145,7 +150,7 @@
 				<div class="card-body" style="border-radius:0;">
 					<h5 class="card-title text-dark fw-bold">${course.title}</h5>
 					<p class="card-text text-justify  text-muted">
-					  ${short_description}
+					  ${course.short_description}
 					</p>
 					<a href="/courses/${slug}" class="btn btn-outline-success">Read More &rarr;</a>
 				</div>

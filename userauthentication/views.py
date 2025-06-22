@@ -5,9 +5,18 @@ from django.contrib.auth import get_user_model, authenticate, login, logout
 from .models import Roles, UserRoles, UserDetails
 from django.contrib.auth.models import Group
 from rest_framework import status
+from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
+from allauth.socialaccount.providers.oauth2.client import OAuth2Client
+from django.shortcuts import redirect
+from django.conf import settings
+from allauth.socialaccount.models import SocialApp, SocialLogin
+from django.contrib.sites.models import Site
 import json
 import time
 import re
+import random
+import string
+import requests
 
 User = get_user_model()
 
@@ -92,5 +101,3 @@ def logout_user(request):
         logout(request)
         return JsonResponse({'success': True, 'message': 'Logout Successful!', 'redirect_url': '/'})
     return JsonResponse({'success': False, 'message': 'Invalid request method'}, status=400)
-
-

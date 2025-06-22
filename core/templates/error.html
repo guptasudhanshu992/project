@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ error_title|default:"Error" }}{% endblock title %}
+
+{% block extra_head %}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 2rem;
+            background-color: #fff6f6;
+            color: #333;
+        }
+        .error-container {
+            max-width: 600px;
+            margin: auto;
+            border: 1px solid #faa;
+            border-radius: 8px;
+            padding: 2rem;
+            background-color: #fff0f0;
+        }
+        h2 {
+            color: #d00;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="error-container">
+        <h2>{{ error_title|default:"Oops!" }}</h2>
+        <p>{{ error_message|default:"An unexpected error occurred. Please try again later." }}</p>
+    </div>
+{% endblock content %}

@@ -2,10 +2,11 @@ from django.shortcuts import render
 from django.views import View
 from userauthentication.mixins import RedirectAuthenticatedUserMixin
 from django.contrib.auth.mixins import LoginRequiredMixin
-from courses.models import Course, Lesson
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView
 from django.http import Http404
+from courses.models import Course
+import json
 
 class HomeView(View):
     def get(self, request):
@@ -39,21 +40,31 @@ class ProfileView(LoginRequiredMixin, View):
     def get(self, request):
         return render(request, 'profile.html')
 
-class CourseDetailsView(DetailView):
+class CourseDetailsView(View):
     def get(self, request, slug):
-        return render(request, 'course_details.html')
+        course = get_object_or_404(Course, slug=slug)
+        context = {
+            'course_details': course
+        }
+        return render(request, 'course_details.html', context)
 
-class LessonView(DetailView):
-    model = Lesson
-    template_name = 'lesson.html'
-    context_object_name = 'lesson_details'
-
-    def get_object(self):
-        lesson_id = self.kwargs.get('lesson_id')
-        lesson_details = get_object_or_404(Lesson, id=lesson_id)
-
-        return lesson_details
+class CourseContentsView(View):
+    def get(self, request, slug):
+        course = get_object_or_404(Course, slug=slug)
+        try:
+            course_structure = course.course_structure
+        except (TypeError, json.JSONDecodeError):
+            course_structure = {"chapters": []}
         
+        return render(request, 'course_contents.html', {"course_structure": course_structure})
+
+class CartView(View):
+    def get(self, request):
+        return render(request, 'cart.html')
+
+class WishlistView(View):
+    def get(self, request):
+        return render(request, 'wishlist.html')
         
 def custom_404_view(request, exception):
     return render(request, '404.html', status=404)

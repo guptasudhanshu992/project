@@ -1,8 +1,8 @@
 from django.http import JsonResponse
 from django.views import View
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from .models import Course, CourseCategory
-from .serializers import CourseSerializer, CategorySerializer
+from .models import Course, Category, CourseTopic
+from .serializers import CourseSerializer, CategorySerializer, TopicSerializer
 from django.views.generic import DetailView
 from django.shortcuts import get_object_or_404
 from rest_framework import status
@@ -28,8 +28,8 @@ class PublishedCourseCardsView(View):
 
         serializer = CourseSerializer(blogs, many=True)
 
-        categories = CourseCategory.objects.all()
-        category_serializer = CategorySerializer(CourseCategory.objects.all(), many=True)
+        categories = Category.objects.all()
+        category_serializer = CategorySerializer(Category.objects.all(), many=True)
         
         response = {
             'data': serializer.data,
@@ -49,3 +49,12 @@ class CourseOverviewAPIView(View):
         course = get_object_or_404(Course, slug=slug)
         serializer = CourseSerializer(course)
         return JsonResponse(serializer.data, status=status.HTTP_200_OK)
+
+class TopicDetailsAPIView(View):
+    def get(self, request, id):
+        topic = get_object_or_404(CourseTopic, id=id)
+        serializer = TopicSerializer(topic)
+        response = {
+            'data' : serializer.data,
+        }
+        return JsonResponse(response, status=status.HTTP_200_OK)

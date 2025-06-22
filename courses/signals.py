@@ -1,38 +1,51 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from .models import Lesson, Course
+from .models import CourseTopic, Course
 import json
 
-@receiver(post_save, sender=Lesson)
-def update_course_content(sender, instance, **kwargs):
-    course = instance.chapter.course
+@receiver(post_save, sender=CourseTopic)
+def update_course_structure(sender, instance, **kwargs):
+    chapter = instance.chapter
+    course = chapter.course
 
-    course_hierarchy = []
-    for chapter in course.chapters.all():
-        chapter_data = {
-            'chapter_name': chapter.title,
-            'lessons': [{'lesson_name': lesson.title, 'lesson_id': lesson.id} for lesson in chapter.lessons.all()]
-        }
-        course_hierarchy.append(chapter_data)
+    structure = []
 
-    course.course_content = course_hierarchy
+    chapters = course.chapters.all().order_by('order')
+    for ch in chapters:
+        topics = ch.topics.all().order_by('order')
+        topic_list = []
+        for tp in topics:
+            topic_list.append({
+                "id": str(tp.id),
+                "title": tp.title,
+                "video_url": tp.video_url,
+                "content": tp.content,
+                "order": tp.order,
+            })
+        structure.append({
+            "id": str(ch.id),
+            "title": ch.title,
+            "order": ch.order,
+            "topics": topic_list
+        })
+
+    course.course_structure = {
+        "course_id": str(course.id),
+        "title": course.title,
+        "chapters": structure
+    }
     course.save()
 
 @receiver(post_save, sender=Course)
 def update_course_card_json(sender, instance, created, **kwargs):
     course_card_data = {
-        "course_id": instance.course_id,
         "title": instance.title,
-        "course_url": instance.course_url,
-        "course_image": instance.course_image.url if instance.course_image else None,
+        "slug": instance.slug,
+        "cover_image": instance.cover_image.url if instance.cover_image else None,
         "price": str(instance.price) if instance.price else None,
         "short_description": instance.short_description,
-        "author": "",#instance.author.username,
+        "instructor": instance.instructor.email,
         "language": instance.language,
         "preview_video": instance.preview_video,
-        "course_category": instance.course_category.name if instance.course_category else None,
+        "category": instance.category.name if instance.category else None,
     }
-    
-    if (course_card_data != instance.course_card_json):
-        instance.course_card_json = course_card_data
-        instance.save(update_fields=["course_card_json"])

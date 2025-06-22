@@ -12,10 +12,21 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
+import environ
+
+import logging
+
+logger = logging.getLogger('allauth')
+logger.setLevel(logging.DEBUG)
+logger.addHandler(logging.StreamHandler())
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+env = environ.Env()
+env_file = os.path.join(BASE_DIR, '.env')
+environ.Env.read_env(env_file)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -24,20 +35,28 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-fy@z83vc7(pns58y%p+)4wizox44w$95uis%+w$-chj(k)e^5i"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env.bool('DEBUG', default=False)
 
 ALLOWED_HOSTS = ['*']
 
+SITE_ID=1
 
 # Application definition
-
 INSTALLED_APPS = [
+    "django.contrib.sites",
     "core",
     "userauthentication",
     "blog",
     "rest_framework",
     "django_ckeditor_5",
     "courses",
+    "payments",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.facebook",
+    "allauth.socialaccount.providers.google",
+    "allauth.socialaccount.providers.reddit",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -55,6 +74,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = "project.urls"
@@ -77,16 +97,27 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "project.wsgi.application"
 
-
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+if DEBUG:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': env('ENGINE'),
+            'NAME': env('NAME'),
+            'USER': env('USER'),
+            'PASSWORD': env('PASSWORD'),
+            'HOST': env('HOST'),
+            'PORT': env('PORT'),
+        }
+    }
 
 
 # Password validation
@@ -112,27 +143,19 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
 LANGUAGE_CODE = "en-us"
-
-TIME_ZONE = "UTC"
-
+TIME_ZONE = "Asia/Kolkata"
 USE_I18N = True
-
+USE_L10N = True
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = "/static/"
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# Directory where Django will collect static files
-STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
-
-# Additional static files directories (useful for development)
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),
-]
+MEDIA_URL = f"https://{env('AWS_STORAGE_BUCKET_NAME')}.s3.amazonaws.com/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -143,30 +166,67 @@ AUTH_USER_MODEL = 'userauthentication.NewUser'
 
 LOGIN_REDIRECT_URL = '/profile/'
 
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '[{levelname}] {asctime} {name} - {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '[{levelname}] {message}',
+            'style': '{',
+        },
+        'error': {
+            'format': '[{levelname}] {asctime} {message}',
+            'style': '{',
+        },
+    },
     'handlers': {
-        'file': {
-            'level': 'ERROR',
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'django_errors.log'),
-        },
         'console': {
-            'level': 'ERROR',
             'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
         },
+        's3_file': {
+            'class': 'logging.FileHandler',
+            'filename': 's3_debug.log',
+            'formatter': 'verbose',
+        },
+        'error_file': {
+            'class': 'logging.FileHandler',
+            'filename': 'server_errors.log',
+            'formatter': 'error',
+        }
     },
     'loggers': {
         'django': {
-            'handlers': ['file', 'console'],
-            'level': 'ERROR',
+            'handlers': ['console', 'error_file'],
+            'level': 'INFO',
             'propagate': True,
+        },
+        'django.request': {
+            'handlers': ['console', 'error_file'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'boto3': {
+            'handlers': ['console', 's3_file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'botocore': {
+            'handlers': ['console', 's3_file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'storages.backends.s3boto3': {
+            'handlers': ['console', 's3_file'],
+            'level': 'DEBUG',
+            'propagate': False,
         },
     },
 }
-
 
 customColorPalette = [
     {
@@ -199,8 +259,9 @@ CKEDITOR_5_CONFIGS = {
     'default': {
         'toolbar': {
             'items': ['heading', '|', 'bold', 'italic', 'link',
-                      'bulletedList', 'numberedList', 'blockQuote', 'imageUpload', ],
-                    }
+                      'bulletedList', 'numberedList', 'blockQuote', 'imageUpload', 'mediaEmbed', '|', 'undo', 'redo' ],
+                    },
+            'extraPlugins': ['MediaEmbed'],
 
     },
     'extends': {
@@ -260,4 +321,58 @@ CKEDITOR_5_CONFIGS = {
             'reversed': 'true',
         }
     }
+}
+
+CKEDITOR_5_UPLOAD_PATH = "uploads/"
+
+STRIPE_PUBLISHABLE_KEY = env('PUBLISHABLE_KEY', default="")
+STRIPE_SECRET_KEY = env('SECRET_KEY', default="")
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+SOCIALACCOUNT_ADAPTER = 'userauthentication.adapter.CustomSocialAccountAdapter'
+
+SOCIALACCOUNT_LOGIN_ON_GET = True
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_LOGIN_METHODS = {'email'}
+ACCOUNT_SIGNUP_FIELDS = {'email*'}
+
+SOCIALACCOUNT_AUTO_SIGNUP = False
+
+AWS_ACCESS_KEY_ID=env('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY=env('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME=env('AWS_STORAGE_BUCKET_NAME')
+AWS_S3_REGION_NAME=env('AWS_S3_REGION_NAME')
+AWS_S3_FILE_OVERWRITE = False
+AWS_DEFAULT_ACL = None
+AWS_QUERYSTRING_AUTH = False 
+
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        "OPTIONS": {
+            "access_key": env("AWS_ACCESS_KEY_ID"),
+            "secret_key": env("AWS_SECRET_ACCESS_KEY"),
+            "bucket_name": env("AWS_STORAGE_BUCKET_NAME"),
+            "region_name": env("AWS_S3_REGION_NAME"),
+            "default_acl": None,
+            "file_overwrite": False,
+            "querystring_auth": False,
+            "location": "media",
+            "custom_domain": f"{env('AWS_STORAGE_BUCKET_NAME')}.s3.amazonaws.com",
+        }
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
+AWS_S3_OBJECT_PARAMETERS = {
+    "CacheControl": "max-age=86400",
 }
