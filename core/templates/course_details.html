@@ -225,12 +225,12 @@
 							controls
 							width="100%"
 							height="auto"
-							poster="MY_VIDEO_POSTER.jpg"
+							poster="my_poster.jpg"
 							data-setup='{
 							  "techOrder": ["youtube"],
 							  "sources": [{
 								"type": "video/youtube",
-								"src": "https://www.youtube.com/watch?v=gEV_Po7PeIY"
+								"src": "{{ course_details.preview_video }}"
 							  }],
 							  "youtube": {
 								"modestbranding": 1,
@@ -321,8 +321,7 @@
                             <p class="text-muted mt-2">Limited time offer ends in 3 days</p>
                         </div>
 
-						<button class="btn btn-success w-100 mb-3 py-3 fs-5 fw-bold"   onclick="Cart.addItem({id: '{{ course_details.id }}', title: '{{ course_details.title|escapejs }}', price: {{ course_details.price|default:0 }}, image: '{% if course_details.cover_image %}{{ course_details.cover_image.url }}{% else %}/static/img/default.jpg{% endif %}'
-						});">Enroll Now</button>
+						<button class="btn btn-success w-100 mb-3 py-3 fs-5 fw-bold"   onclick="enrollNow()">Enroll Now</button>
                         <button class="btn btn-outline-success w-100 mb-3">Add to Wishlist</button>
 
                         <div class="text-center mb-3">
@@ -384,7 +383,7 @@
             </div>
         </div>
     </section>
-    <script>
+    <script>	
         document.addEventListener('DOMContentLoaded', function() {
             const playButton = document.querySelector('.play-button');
             const videoPlayer = document.querySelector('.video-player');

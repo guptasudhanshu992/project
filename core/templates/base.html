@@ -25,6 +25,8 @@
     <meta name="twitter:description" content="Explore insightful blogs, detailed courses, and expert content on My Django Project.">
     <meta name="twitter:image" content="{% static 'images/og-image.jpg' %}">
 
+	<meta name="google-adsense-account" content="ca-pub-6582505297165677">
+
     <link rel="icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
 
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
@@ -36,10 +38,8 @@
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js" crossorigin="anonymous"></script>
-	
-	
 	<script src="{% static 'js/shop.js' %}"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" crossorigin="anonymous"></script>
 	
     <style>
         :root {
@@ -200,12 +200,15 @@
                         </li>
                     </ul>
                 </div>
-                <div class="d-flex align-items-center gap-2"> {# Aligned items vertically #}
+                <div class="d-flex align-items-center gap-3"> {# Aligned items vertically #}
 					<a href="/wishlist/" class="btn btn-outline-danger position-relative" aria-label="Wishlist">
 						<i class="fa-regular fa-heart"></i>
 					</a>
 					<a href="/cart/" class="btn btn-outline-secondary position-relative" aria-label="Cart">
 						<i class="fa-solid fa-cart-shopping"></i>
+						<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="cartitemcount">
+						<span class="visually-hidden">Cart Item Count</span>
+						</span>
 					</a>
 
                     {% if user.is_authenticated %}
@@ -300,7 +303,14 @@
             window.addEventListener("load", function () {
                 document.getElementById("loader")?.remove();
             });
-
+			
+			try{
+				Cart.updateCartIcon();
+				console.log("cart update totals");
+			}catch{
+				console.log("Update cart icons.");
+			}
+			
             // Active nav link animation (adjusted for new class structure)
             let currentPath = window.location.pathname.split("/").filter(Boolean).pop();
             const navLinks = document.querySelectorAll(".navbar-nav .nav-link");
@@ -355,6 +365,23 @@
                 if (parts.length === 2) return parts.pop().split(";").shift();
             }
         });
+		
+		function enrollNow() {
+			const product = {
+				id: '{{ course_details.id }}',
+				title: '{{ course_details.title|escapejs }}',
+				price: {{ course_details.price|default:89 }},
+				image: '{% if course_details.cover_image %}{{ course_details.cover_image.url }}{% else %}/static/img/default.jpg{% endif %}',
+				quantity: 1
+			};
+			
+			if (typeof Cart !== "undefined") {
+				Cart.addItem(product);
+				alert("Course added to cart!");
+			} else {
+				console.error("Cart is not defined");
+			}
+		}
     </script>
 </body>
 </html>
